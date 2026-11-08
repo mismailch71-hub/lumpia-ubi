@@ -7,13 +7,13 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
-// 1. Landing Page Publik (Mengirimkan data $products ke View welcome)
+// 1. Landing Page Publik
 Route::get('/', function () {
     $products = Product::where('is_available', true)->get();
     return view('welcome', compact('products'));
 });
 
-// 2. Route Autentikasi Manual (Hanya untuk Tamu / Guest)
+// 2. Route Autentikasi Manual (Guest)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
@@ -21,7 +21,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
-// Logout (Wajib Login / Authenticated)
+// Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 // 3. Redirect / Dashboard User Berdasarkan Role
@@ -39,13 +39,14 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware('auth')->name('dashboard');
 
-// 4. Group Route Khusus Admin (Protected Middleware Role:Admin)
+// 4. Group Route Khusus Admin
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
     
     // Kelola Pesanan Admin
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/{id}/assign-kurir', [OrderController::class, 'assignKurir'])->name('orders.assign-kurir');
+    Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
     
     // CRUD Produk Lumpia Ubi
     Route::resource('products', ProductController::class);

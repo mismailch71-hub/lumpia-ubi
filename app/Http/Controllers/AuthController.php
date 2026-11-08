@@ -9,70 +9,87 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // Tampilkan Halaman Login
+    /**
+     * Tampilkan Halaman Form Login
+     */
     public function showLogin()
     {
         return view('auth.login');
     }
 
-    // Proses Login User
+    /**
+     * Proses Autentikasi / Login User
+     */
     public function login(Request $request)
     {
+        // 1. Validasi Input Form
         $credentials = $request->validate([
             'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
+        // 2. Cek Kredensial Login
+        if (Auth::attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
 
             $user = Auth::user();
 
-            // Redirect berdasarkan Role User
+            // 3. Redirect Dinamis Berdasarkan Role Spatie
             if ($user->hasRole('admin')) {
                 return redirect()->route('admin.dashboard');
             } elseif ($user->hasRole('kurir')) {
-                return redirect()->route('dashboard');
+                return redirect()->route('dashboard'); // Diarahkan ke dashboard kurir
             }
 
+            // Default untuk Role Customer
             return redirect()->route('dashboard');
         }
 
+        // 4. Jika Gagal, Kembalikan Pesan Error
         return back()->withErrors([
-            'email' => 'Email atau password yang kamu masukkan salah.',
+            'email' => 'Email atau password yang Anda masukkan salah.',
         ])->onlyInput('email');
     }
 
-    // Tampilkan Halaman Register
+    /**
+     * Tampilkan Halaman Form Register Customer
+     */
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    // Proses Register Customer Baru
+    /**
+     * Proses Pendaftaran User Baru (Role Customer)
+     */
     public function register(Request $request)
     {
+        // 1. Validasi Input Register
         $request->validate([
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
+        // 2. Buat User Baru
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        // Berikan role customer secara otomatis
+        // 3. Otomatis Assign Role 'customer' Spatie
         $user->assignRole('customer');
 
+        // 4. Otomatis Login Setelah Register Success
         Auth::login($user);
 
-        return redirect()->route('dashboard');
+        return redirect()->route('dashboard')->with('success', 'Pendaftaran berhasil! Selamat datang di Lumpia Ubi.');
     }
 
-    // Proses Logout
+    /**
+     * Proses Logout User
+     */
     public function logout(Request $request)
     {
         Auth::logout();
@@ -80,6 +97,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login')->with('success', 'Anda telah berhasil keluar.');
     }
 }
