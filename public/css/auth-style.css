@@ -1,0 +1,154 @@
+/* BACKGROUND UNGU DENGAN GRADIENT & POLA PATTERN DEKORATIF */
+body.auth-page {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    
+    /* Warna Dasar Ungu Gradasi */
+    background-color: #2e0743;
+    background-image: 
+        /* Efek Orbs / Cahaya Melingkar */
+        radial-gradient(circle at 15% 20%, rgba(168, 85, 247, 0.35) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(217, 119, 6, 0.25) 0%, transparent 40%),
+        /* Pola Bintik-bintik Modern (Polka Dot Pattern) */
+        radial-gradient(rgba(255, 255, 255, 0.12) 1.5px, transparent 1.5px);
+    background-size: 100% 100%, 100% 100%, 24px 24px;
+}
+
+/* KARTU FORM AUTH DENGAN EFEK KACA (GLASSMORPHISM) */
+.auth-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    position: relative;
+    z-index: 10;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+.auth-header .logo { 
+    font-size: 40px; 
+}
+.auth-header h2 { 
+    font-size: 22px; 
+    font-weight: 900; 
+    color: #3b0764; 
+    margin: 8px 0 4px 0; 
+}
+.auth-header p { 
+    font-size: 13px; 
+    color: #64748b; 
+    margin: 0; 
+}
+
+.form-group { 
+    margin-bottom: 16px; 
+}
+.form-group label { 
+    display: block; 
+    font-size: 11px; 
+    font-weight: 800; 
+    color: #475569; 
+    text-transform: uppercase; 
+    margin-bottom: 6px; 
+    letter-spacing: 0.5px; 
+}
+.form-group input { 
+    width: 100%; 
+    padding: 12px 14px; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 12px; 
+    font-size: 13px; 
+    box-sizing: border-box; 
+    outline: none; 
+    transition: all 0.2s; 
+}
+.form-group input:focus { 
+    border-color: #7e22ce;
+    box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.15);
+}
+
+.btn-submit { 
+    width: 100%; 
+    background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%); 
+    color: #ffffff; 
+    font-weight: 800; 
+    font-size: 13px; 
+    padding: 13px; 
+    border: none; 
+    border-radius: 12px; 
+    cursor: pointer; 
+    transition: transform 0.2s, box-shadow 0.2s; 
+    margin-top: 8px; 
+}
+.btn-submit:hover { 
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(88, 28, 135, 0.4);
+}
+
+.auth-footer { 
+    text-align: center; 
+    margin-top: 20px; 
+    font-size: 13px; 
+    color: #64748b; 
+}
+.auth-footer a { 
+    color: #7e22ce; 
+    font-weight: 800; 
+    text-decoration: none; 
+}
+.auth-footer a:hover { 
+    text-decoration: underline; 
+}
+
+.alert-error { 
+    background: #fef2f2; 
+    border: 1px solid #fecaca; 
+    color: #b91c1c; 
+    font-size: 12px; 
+    padding: 12px; 
+    border-radius: 12px; 
+    margin-bottom: 16px; 
+}
+.alert-error ul { 
+    margin: 0; 
+    padding-left: 18px; 
+}
+
+/* STYLING CHECKBOX SHOW PASSWORD */
+.show-password-group {
+    display: flex;
+    align-items: left;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.show-password-group input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: #7e22ce;
+    cursor: pointer;
+}
+
+.show-password-group label {
+    font-size: 12px;
+    color: #64748b;
+    cursor: pointer;
+    user-select: none;
+    text-transform: none;
+    font-weight: 600;
+    margin-bottom: 0;
+}
