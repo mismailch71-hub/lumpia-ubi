@@ -15,12 +15,12 @@
                 <span>🍠</span> Lumpia Ubi Admin
             </div>
             <ul class="sidebar-menu">
-                <li><a href="#" class="active">📊 Dashboard</a></li>
-                <li><a href="#">📦 Kelola Pesanan</a></li>
-                <li><a href="#">🍠 Kelola Produk</a></li>
-                <li><a href="#">🛵 Daftar Kurir</a></li>
-                <li><a href="#">👥 Data Customer</a></li>
-                <li><a href="#">📈 Laporan</a></li>
+                <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">📊 Dashboard</a></li>
+                <li><a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">📦 Kelola Pesanan</a></li>
+                <li><a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">🍠 Kelola Produk</a></li>
+                <li><a href="{{ route('admin.couriers.index') }}" class="{{ request()->routeIs('admin.couriers.*') ? 'active' : '' }}">🛵 Daftar Kurir</a></li>
+                <li><a href="#" class="{{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">👥 Data Customer</a></li>
+                <li><a href="#" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">📈 Laporan</a></li>
             </ul>
         </div>
 
@@ -89,6 +89,9 @@
                         // Logika Inisial Nama Depan Kurir (Yoga -> Y, Rafi -> R, Mail -> M)
                         $cleanName = trim(str_replace(['Kurir ', '(Kurir 1)', '(Kurir 2)', '(Kurir 3)'], '', $courier->name));
                         $initial = strtoupper(substr($cleanName, 0, 1));
+                        
+                        // Status Keaktifan Dinamis
+                        $isBusy = in_array($courier->id, $busyCourierIds ?? []);
                     @endphp
                     <div class="courier-card">
                         <div class="courier-avatar">
@@ -97,7 +100,11 @@
                         <div class="courier-info">
                             <h4>{{ $courier->name }}</h4>
                             <p>{{ $courier->email }}</p>
-                            <span class="badge-status badge-online">🟢 Ready / Siap Antar</span>
+                            @if($isBusy)
+                                <span class="badge-status badge-busy">🟡 Sedang Mengantar</span>
+                            @else
+                                <span class="badge-status badge-online">🟢 Ready / Siap Antar</span>
+                            @endif
                         </div>
                     </div>
                 @empty
@@ -129,16 +136,24 @@
                                 <td>
                                     @if($order->status == 'pending')
                                         <span class="badge-order badge-pending">Menunggu Konfirmasi</span>
-                                    @elseif($order->status == 'diproses')
+                                    @elseif($order->status == 'dalam_pengiriman' || $order->status == 'diproses')
                                         <span class="badge-order badge-process">Sedang Diproses</span>
-                                    @else
+                                    @elseif($order->status == 'selesai')
                                         <span class="badge-order badge-success">Selesai</span>
+                                    @else
+                                        <span class="badge-order" style="background: #f1f5f9; color: #475569;">{{ ucfirst($order->status) }}</span>
                                     @endif
                                 </td>
                                 <td>Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
-                                <td>{{ $order->courier_name ?? 'Belum Ditugaskan' }}</td>
                                 <td>
-                                    <a href="#" class="btn-action-small">Assign Kurir</a>
+                                    @if(!empty($order->courier_name))
+                                        <strong>🛵 {{ $order->courier_name }}</strong>
+                                    @else
+                                        <span style="color: #94a3b8; font-style: italic;">Belum Ditugaskan</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('admin.orders.index') }}" class="btn-action-small">Assign Kurir</a>
                                 </td>
                             </tr>
                         @empty

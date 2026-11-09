@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\CourierController;
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
@@ -39,8 +40,10 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware('auth')->name('dashboard');
 
-// 4. Group Route Khusus Admin
+// Group Route Khusus Admin
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    
+    // Admin Dashboard
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
     
     // Kelola Pesanan Admin
@@ -50,4 +53,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // CRUD Produk Lumpia Ubi
     Route::resource('products', ProductController::class);
+
+    // Kelola Daftar Kurir (Dinamis)
+    Route::get('/couriers', [CourierController::class, 'index'])->name('couriers.index');
+    Route::post('/couriers', [CourierController::class, 'store'])->name('couriers.store');
+    Route::delete('/couriers/{id}', [CourierController::class, 'destroy'])->name('couriers.destroy');
+
 });

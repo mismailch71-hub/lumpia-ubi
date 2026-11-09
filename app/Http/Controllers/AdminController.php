@@ -20,21 +20,35 @@ class AdminController extends Controller
         $totalCouriers  = User::role('kurir')->count();
         $totalCustomers = User::role('customer')->count();
         
-        // Cek aman apakah tabel orders sudah ada di database
-        $totalOrders  = 0;
-        $totalRevenue = 0;
-        $recentOrders = [];
+        // Inisialisasi default aman jika tabel orders belum terbuat
+        $totalOrders    = 0;
+        $totalRevenue   = 0;
+        $recentOrders   = [];
+        $busyCourierIds = [];
 
         if (Schema::hasTable('orders')) {
             $totalOrders  = DB::table('orders')->count();
             $totalRevenue = DB::table('orders')->where('status', 'selesai')->sum('total_price') ?? 0;
             
+            // Ambil 5 pesanan terbaru lengkap dengan nama customer & nama kurir pengantar
             $recentOrders = DB::table('orders')
-                ->join('users', 'orders.user_id', '=', 'users.id')
-                ->select('orders.*', 'users.name as customer_name')
+                ->join('users as customers', 'orders.user_id', '=', 'customers.id')
+                ->leftJoin('users as couriers', 'orders.courier_id', '=', 'couriers.id')
+                ->select(
+                    'orders.*',
+                    'customers.name as customer_name',
+                    'couriers.name as courier_name'
+                )
                 ->orderBy('orders.created_at', 'desc')
                 ->take(5)
                 ->get();
+
+            // Ambil ID Kurir yang saat ini sedang dalam pengiriman aktif
+            $busyCourierIds = DB::table('orders')
+                ->where('status', 'dalam_pengiriman')
+                ->whereNotNull('courier_id')
+                ->pluck('courier_id')
+                ->toArray();
         }
 
         // 2. Data Kurir Aktif
@@ -47,6 +61,7 @@ class AdminController extends Controller
             'totalOrders',
             'totalRevenue',
             'couriers',
+            'busyCourierIds',
             'recentOrders'
         ));
     }
