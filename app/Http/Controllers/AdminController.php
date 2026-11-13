@@ -21,16 +21,22 @@ class AdminController extends Controller
         $totalCustomers = User::role('customer')->count();
         
         // Inisialisasi default aman jika tabel orders belum terbuat
-        $totalOrders    = 0;
-        $totalRevenue   = 0;
-        $recentOrders   = [];
-        $busyCourierIds = [];
+        $totalOrders              = 0;
+        $totalRevenue             = 0;
+        $pendingVerificationCount = 0;
+        $recentOrders             = [];
+        $busyCourierIds           = [];
 
         if (Schema::hasTable('orders')) {
             $totalOrders  = DB::table('orders')->count();
             $totalRevenue = DB::table('orders')->where('status', 'selesai')->sum('total_price') ?? 0;
             
-            // Ambil 5 pesanan terbaru lengkap dengan nama customer & nama kurir pengantar
+            // Hitung jumlah pesanan QRIS yang menunggu verifikasi bukti bayar
+            $pendingVerificationCount = DB::table('orders')
+                ->where('status', 'menunggu_verifikasi')
+                ->count();
+
+            // Ambil 10 pesanan terbaru lengkap dengan nama customer & nama kurir pengantar
             $recentOrders = DB::table('orders')
                 ->join('users as customers', 'orders.user_id', '=', 'customers.id')
                 ->leftJoin('users as couriers', 'orders.courier_id', '=', 'couriers.id')
@@ -40,7 +46,7 @@ class AdminController extends Controller
                     'couriers.name as courier_name'
                 )
                 ->orderBy('orders.created_at', 'desc')
-                ->take(5)
+                ->take(10)
                 ->get();
 
             // Ambil ID Kurir yang saat ini sedang dalam pengiriman aktif
@@ -60,9 +66,36 @@ class AdminController extends Controller
             'totalCustomers',
             'totalOrders',
             'totalRevenue',
+            'pendingVerificationCount',
             'couriers',
             'busyCourierIds',
             'recentOrders'
         ));
+    }
+
+    /**
+     * Konfirmasi Bukti Pembayaran QRIS Valid -> Ubah Status ke Diproses
+     */
+    public function verifyPayment($id)
+    {
+        DB::table('orders')->where('id', $id)->update([
+            'status'     => 'diproses',
+            'updated_at' => now(),
+        ]);
+
+        return back()->with('success', 'Pembayaran QRIS untuk pesanan #ORD-' . $id . ' dikonfirmasi VALID! Pesanan siap ditugaskan ke kurir.');
+    }
+
+    /**
+     * Tolak Bukti Pembayaran QRIS Tidak Valid / Palsu
+     */
+    public function rejectPayment($id)
+    {
+        DB::table('orders')->where('id', $id)->update([
+            'status'     => 'ditolak',
+            'updated_at' => now(),
+        ]);
+
+        return back()->with('error', 'Bukti pembayaran pesanan #ORD-' . $id . ' ditolak.');
     }
 }

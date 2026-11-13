@@ -1,0 +1,522 @@
+/* ==========================================
+   1. STYLE HALAMAN RIWAYAT PESANAN (ORDERS)
+   ========================================== */
+.customer-order-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.courier-info-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.courier-info-text {
+    font-size: 13px;
+    color: #166534;
+}
+
+.badge-status-diproses {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.badge-status-pengiriman {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-status-selesai {
+    background: #d1fae5;
+    color: #047857;
+}
+
+/* ==========================================
+   2. STYLE KATALOG PRODUK (DESKTOP 2 KOLOM)
+   ========================================== */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.product-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.product-image-box {
+    width: 100%;
+    height: 190px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-image-placeholder {
+    font-size: 48px;
+}
+
+.product-card-title {
+    margin: 0;
+    color: #1e293b;
+    font-size: 18px;
+}
+
+.product-card-desc {
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+.product-price-box {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+}
+
+.price-tag {
+    background: #f3e8ff;
+    color: #6b21a8;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.form-order-catalog {
+    margin-top: 15px;
+}
+
+.btn-order-submit {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* ==========================================
+   3. MODAL CHECKOUT & SUMMARY GOFOOD STYLE
+   ========================================== */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.modal-product-summary {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 16px;
+}
+
+.modal-product-img {
+    width: 65px;
+    height: 65px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.modal-product-detail h4 {
+    margin: 0;
+    font-size: 15px;
+    color: #1e293b;
+}
+
+.modal-product-detail p {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.order-summary-box {
+    background: #fcf7ff;
+    border: 1px solid #e9d5ff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 16px 0;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.summary-row.total {
+    font-size: 15px;
+    font-weight: bold;
+    color: #6b21a8;
+    border-top: 1px dashed #d8b4fe;
+    padding-top: 8px;
+    margin-top: 6px;
+    margin-bottom: 0;
+}
+
+/* ==========================================
+   4. HEADER FLEX & TOGGLE LAYOUT (DESKTOP)
+   ========================================== */
+.mobile-top-header {
+    display: none;
+}
+
+.header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.btn-layout-toggle {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+}
+
+.btn-layout-toggle:hover {
+    background: #f8fafc;
+    border-color: #6b21a8;
+    color: #6b21a8;
+}
+
+/* MODE NAVIGASI BAWAH DI DESKTOP */
+body.layout-bottom {
+    display: block !important;
+    padding-bottom: 85px;
+}
+
+body.layout-bottom .sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100% !important;
+    height: 68px !important;
+    flex-direction: row !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    padding: 0 20px !important;
+    z-index: 900;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+}
+
+body.layout-bottom .sidebar > div {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+body.layout-bottom .sidebar-brand {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: none !important;
+    font-size: 16px;
+}
+
+body.layout-bottom .sidebar-menu {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 12px;
+    margin: 0 !important;
+}
+
+body.layout-bottom .sidebar-menu li {
+    margin-bottom: 0 !important;
+}
+
+body.layout-bottom .sidebar-menu a {
+    padding: 8px 16px !important;
+    font-size: 14px;
+}
+
+body.layout-bottom .sidebar form {
+    margin: 0 !important;
+}
+
+body.layout-bottom .btn-logout {
+    width: auto !important;
+    padding: 8px 16px !important;
+    font-size: 13px;
+}
+
+body.layout-bottom .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 1100px;
+    margin: 0 auto !important;
+}
+
+/* ==========================================
+   5. RESPONSIVE MOBILE VIEW (LAYAR HP <= 768px)
+   ========================================== */
+@media (max-width: 768px) {
+    .mobile-top-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #2e073f;
+        color: #ffffff;
+        padding: 14px 18px;
+        font-size: 17px;
+        font-weight: 700;
+        position: sticky;
+        top: 0;
+        z-index: 940;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    body.admin-body {
+        display: block !important;
+        padding-bottom: 85px !important;
+        background: #f8fafc;
+    }
+
+    .btn-layout-toggle {
+        display: none !important;
+    }
+
+    .sidebar {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        top: auto !important;
+        width: 100% !important;
+        height: 68px !important;
+        background: #2e073f !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 0 12px !important;
+        z-index: 950 !important;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .sidebar-brand {
+        display: none !important;
+    }
+
+    .sidebar > div {
+        width: 68%;
+    }
+
+    .sidebar-menu {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-around !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .sidebar-menu li {
+        margin: 0 !important;
+        flex: 1;
+        text-align: center;
+    }
+
+    .sidebar-menu a {
+        padding: 6px 4px !important;
+        font-size: 11px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 3px;
+        border-radius: 8px;
+    }
+
+    .sidebar form {
+        margin: 0 !important;
+        width: auto !important;
+    }
+
+    .btn-logout {
+        padding: 8px 12px !important;
+        font-size: 11px !important;
+        width: auto !important;
+        border-radius: 8px !important;
+        white-space: nowrap;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 16px 14px !important;
+    }
+
+    .header-title h2 {
+        font-size: 20px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .header-title p {
+        font-size: 12px !important;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+        margin-top: 14px !important;
+    }
+
+    .product-card {
+        padding: 10px !important;
+        border-radius: 12px !important;
+    }
+
+    .product-image-box {
+        height: 115px !important;
+        border-radius: 8px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .product-card-title {
+        font-size: 14px !important;
+        line-height: 1.3;
+        margin-bottom: 4px !important;
+    }
+
+    .product-card-desc {
+        font-size: 11px !important;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-price-box {
+        flex-direction: column !important;
+        gap: 4px !important;
+        margin: 8px 0 !important;
+    }
+
+    .price-tag {
+        font-size: 10.5px !important;
+        padding: 4px 8px !important;
+        display: inline-block;
+        width: fit-content;
+    }
+
+    .btn-order-trigger {
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+        border-radius: 8px !important;
+    }
+
+    .modal-content {
+        width: 92% !important;
+        max-height: 85vh;
+        overflow-y: auto;
+        padding: 16px !important;
+    }
+}
+
+/* ==========================================
+   KOTAK & UKURAN GAMBAR QRIS AGAR PAS
+   ========================================== */
+.payment-instruction-box {
+    background: #f8fafc;
+    border: 1.5px dashed #8b5cf6;
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 12px;
+    margin-bottom: 14px;
+    text-align: center;
+}
+
+.qris-image-preview {
+    width: 180px !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 250px !important;
+    object-fit: contain !important;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin: 10px auto !important;
+    display: block !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    cursor: zoom-in;
+    transition: transform 0.2s ease;
+}
+
+/* Alternatif: Saat gambar diklik/sentuh, sedikit membesar agar mudah di-scan */
+.qris-image-preview:hover,
+.qris-image-preview:active {
+    transform: scale(1.15);
+}

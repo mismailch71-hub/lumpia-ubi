@@ -38,7 +38,7 @@ class AuthController extends Controller
             if ($user->hasRole('admin')) {
                 return redirect()->route('admin.dashboard');
             } elseif ($user->hasRole('kurir')) {
-                return redirect()->route('dashboard'); // Diarahkan ke dashboard kurir
+                return redirect()->route('courier.dashboard'); // Diarahkan ke dashboard kurir
             }
 
             // Default untuk Role Customer

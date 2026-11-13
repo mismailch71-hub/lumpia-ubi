@@ -29,27 +29,27 @@ class RoleAndUserSeeder extends Seeder
         );
         $admin->assignRole($roleAdmin);
 
-        // 3. Akun 3 KURIR (Yoga, Rafi, Mail)
+        // 3. Akun 3 KURIR dengan Password Nama + Angka (123)
         $kurirs = [
             [
                 'name'     => 'Kurir Yoga (Kurir 1)',
                 'email'    => 'yoga@lumpiaubi.com',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('yoga123'),
             ],
             [
                 'name'     => 'Kurir Rafi (Kurir 2)',
                 'email'    => 'rafi@lumpiaubi.com',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('rafi123'),
             ],
             [
                 'name'     => 'Kurir Mail (Kurir 3)',
                 'email'    => 'mail@lumpiaubi.com',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('mail123'),
             ],
         ];
 
         foreach ($kurirs as $data) {
-            $kurirUser = User::firstOrCreate(
+            $kurirUser = User::updateOrCreate(
                 ['email' => $data['email']],
                 [
                     'name'     => $data['name'],
@@ -59,8 +59,7 @@ class RoleAndUserSeeder extends Seeder
             $kurirUser->assignRole($roleKurir);
         }
 
-        // 4. Akun CUSTOMER SAMPLE (Untuk Pengujian Instan)
-        // Pembeli baru tetap bisa mendaftar secara dinamis lewat menu /register
+        // 4. Akun CUSTOMER SAMPLE
         $customer = User::firstOrCreate(
             ['email' => 'customer@gmail.com'],
             [
