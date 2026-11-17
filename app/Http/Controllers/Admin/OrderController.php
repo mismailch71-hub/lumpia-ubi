@@ -32,15 +32,10 @@ class OrderController extends Controller
         // Fitur Search Pintar (Nama Customer / ID Angka / Formatted #ORD-X)
         if ($request->filled('search')) {
             $search = trim($request->search);
-            
-            // Ekstrak angka murni dari input (misal: #ORD-3 / ORD-3 -> 3)
             $cleanId = preg_replace('/[^0-9]/', '', $search);
 
             $query->where(function ($q) use ($search, $cleanId) {
-                // 1. Cari berdasarkan Nama Customer
                 $q->where('customers.name', 'like', "%{$search}%");
-
-                // 2. Jika input mengandung angka, cari berdasarkan ID Order
                 if (!empty($cleanId)) {
                     $q->orWhere('orders.id', $cleanId);
                 }
@@ -62,6 +57,32 @@ class OrderController extends Controller
         $couriers = User::role('kurir')->get();
 
         return view('admin.orders.index', compact('orders', 'couriers'));
+    }
+
+    /**
+     * Konfirmasi Bukti Pembayaran QRIS Valid -> Ubah Status ke Diproses
+     */
+    public function verifyPayment($id)
+    {
+        DB::table('orders')->where('id', $id)->update([
+            'status'     => 'diproses',
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Pembayaran QRIS untuk pesanan #ORD-' . $id . ' dikonfirmasi VALID! Pesanan siap ditugaskan ke kurir.');
+    }
+
+    /**
+     * Tolak Bukti Pembayaran QRIS Tidak Valid / Palsu
+     */
+    public function rejectPayment($id)
+    {
+        DB::table('orders')->where('id', $id)->update([
+            'status'     => 'ditolak',
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('error', 'Bukti pembayaran pesanan #ORD-' . $id . ' ditolak.');
     }
 
     /**
@@ -90,7 +111,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,diproses,dalam_pengiriman,selesai,dibatalkan',
+            'status' => 'required|in:pending,menunggu_verifikasi,diproses,dalam_pengiriman,selesai,dibatalkan,ditolak',
         ]);
 
         DB::table('orders')

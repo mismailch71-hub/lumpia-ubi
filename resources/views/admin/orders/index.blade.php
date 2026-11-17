@@ -34,12 +34,18 @@
     <main class="main-content">
         <div class="header-title">
             <h2>📦 Kelola Pesanan Customer</h2>
-            <p>Atur penugasan kurir (Yoga, Rafi, Mail) dan pantau status transaksi pemesanan.</p>
+            <p>Verifikasi bukti pembayaran QRIS, atur penugasan kurir, dan pantau status transaksi pemesanan.</p>
         </div>
 
         @if(session('success'))
             <div class="alert-success">
                 ✅ {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert-danger" style="background: #fee2e2; color: #b91c1c; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #fecaca;">
+                ⚠️ {{ session('error') }}
             </div>
         @endif
 
@@ -53,10 +59,12 @@
                     
                     <select name="status" class="form-select" onchange="this.form.submit()">
                         <option value="">-- Semua Status --</option>
+                        <option value="menunggu_verifikasi" {{ request('status') == 'menunggu_verifikasi' ? 'selected' : '' }}>Menunggu Verifikasi QRIS</option>
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                         <option value="diproses" {{ request('status') == 'diproses' ? 'selected' : '' }}>Diproses</option>
                         <option value="dalam_pengiriman" {{ request('status') == 'dalam_pengiriman' ? 'selected' : '' }}>Dalam Pengiriman</option>
                         <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                        <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                         <option value="dibatalkan" {{ request('status') == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
                     </select>
 
@@ -73,11 +81,11 @@
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th style="width: 15%;">ID Order</th>
-                            <th style="width: 30%;">Customer & Alamat</th>
-                            <th style="width: 15%;">Total Bayar</th>
+                            <th style="width: 14%;">ID Order</th>
+                            <th style="width: 26%;">Customer & Alamat</th>
+                            <th style="width: 20%;">Total & Bukti Bayar</th>
                             <th style="width: 15%;">Status</th>
-                            <th style="width: 25%;">Penugasan Kurir</th>
+                            <th style="width: 25%;">Verifikasi / Penugasan Kurir</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -91,14 +99,45 @@
                                     <strong>{{ $order->customer_name }}</strong><br>
                                     <span class="address-text">📍 {{ $order->shipping_address }}</span>
                                 </td>
-                                <td><strong>Rp {{ number_format($order->total_price, 0, ',', '.') }}</strong></td>
                                 <td>
-                                    @if($order->status == 'pending')
+                                    <strong>Rp {{ number_format($order->total_price, 0, ',', '.') }}</strong><br>
+                                    @if(strtolower($order->payment_method) == 'qris')
+                                        <span style="display: inline-block; margin-top: 4px; background: #f3e8ff; color: #6b21a8; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: bold;">
+                                            📱 QRIS
+                                        </span>
+                                        @if(!empty($order->payment_proof))
+                                            <div style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+                                                <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" title="Klik untuk perbesar bukti QRIS">
+                                                    <img src="{{ asset('storage/' . $order->payment_proof) }}" 
+                                                         alt="Bukti QRIS" 
+                                                         style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                                </a>
+                                                <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" style="font-size: 11px; color: #2563eb; font-weight: 600; text-decoration: underline;">
+                                                    🔍 Lihat Bukti
+                                                </a>
+                                            </div>
+                                        @else
+                                            <div style="font-size: 11px; color: #dc2626; margin-top: 4px;">⚠️ Tanpa bukti</div>
+                                        @endif
+                                    @else
+                                        <span style="display: inline-block; margin-top: 4px; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: bold;">
+                                            💵 COD
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($order->status == 'menunggu_verifikasi')
+                                        <span class="badge-order" style="background: #fef3c7; color: #b45309;">⏳ Cek Bukti QRIS</span>
+                                    @elseif($order->status == 'pending')
                                         <span class="badge-order badge-pending">Menunggu Konfirmasi</span>
+                                    @elseif($order->status == 'diproses')
+                                        <span class="badge-order" style="background: #e0f2fe; color: #0369a1;">📦 Diproses</span>
                                     @elseif($order->status == 'dalam_pengiriman')
-                                        <span class="badge-order badge-process">Dalam Pengiriman</span>
+                                        <span class="badge-order badge-process">🛵 Dalam Pengiriman</span>
                                     @elseif($order->status == 'selesai')
-                                        <span class="badge-order badge-success">Selesai</span>
+                                        <span class="badge-order badge-success">✅ Selesai</span>
+                                    @elseif($order->status == 'ditolak')
+                                        <span class="badge-order badge-canceled">❌ Bukti Ditolak</span>
                                     @elseif($order->status == 'dibatalkan')
                                         <span class="badge-order badge-canceled">Dibatalkan</span>
                                     @else
@@ -106,24 +145,45 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <!-- FORM TUNGGAL: DENGAN ASSIGN KURIR OTOMATIS MENGUBAH STATUS -->
-                                    <form action="{{ route('admin.orders.assign-kurir', $order->id) }}" method="POST" class="flex-form">
-                                        @csrf
-                                        <select name="courier_id" class="form-select" style="width: 100%;" required>
-                                            <option value="">-- Pilih Kurir --</option>
-                                            @foreach($couriers as $courier)
-                                                @php
-                                                    $cleanCourierName = trim(str_replace(['Kurir ', '(Kurir 1)', '(Kurir 2)', '(Kurir 3)'], '', $courier->name));
-                                                @endphp
-                                                <option value="{{ $courier->id }}" {{ $order->courier_id == $courier->id ? 'selected' : '' }}>
-                                                    🛵 Kurir {{ $cleanCourierName }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <button type="submit" class="btn-submit-small">
-                                            {{ $order->courier_id ? 'Ubah' : 'Tugaskan' }}
-                                        </button>
-                                    </form>
+                                    @if($order->status == 'menunggu_verifikasi')
+                                        <!-- TOMBOL KONFIRMASI / TOLAK BUKTI QRIS -->
+                                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                            <form action="{{ route('admin.orders.verify', $order->id) }}" method="POST" style="flex: 1;" onsubmit="return confirm('Yakin saldo QRIS Rp {{ number_format($order->total_price, 0, ',', '.') }} sudah masuk dan bukti valid?')">
+                                                @csrf
+                                                <button type="submit" style="background: #16a34a; color: #ffffff; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%;">
+                                                    ✅ Valid / Lunas
+                                                </button>
+                                            </form>
+
+                                            <form action="{{ route('admin.orders.reject', $order->id) }}" method="POST" style="flex: 1;" onsubmit="return confirm('Tolak pesanan ini karena bukti pembayaran tidak valid/palsu?')">
+                                                @csrf
+                                                <button type="submit" style="background: #dc2626; color: #ffffff; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%;">
+                                                    ❌ Tolak
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @elseif(in_array($order->status, ['ditolak', 'dibatalkan']))
+                                        <span style="font-size: 12px; color: #94a3b8; font-style: italic;">Pesanan dihentikan</span>
+                                    @else
+                                        <!-- FORM TUNGGAL: ASSIGN KURIR -->
+                                        <form action="{{ route('admin.orders.assign-kurir', $order->id) }}" method="POST" class="flex-form">
+                                            @csrf
+                                            <select name="courier_id" class="form-select" style="width: 100%;" required>
+                                                <option value="">-- Pilih Kurir --</option>
+                                                @foreach($couriers as $courier)
+                                                    @php
+                                                        $cleanCourierName = trim(str_replace(['Kurir ', '(Kurir 1)', '(Kurir 2)', '(Kurir 3)'], '', $courier->name));
+                                                    @endphp
+                                                    <option value="{{ $courier->id }}" {{ $order->courier_id == $courier->id ? 'selected' : '' }}>
+                                                        🛵 Kurir {{ $cleanCourierName }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <button type="submit" class="btn-submit-small">
+                                                {{ $order->courier_id ? 'Ubah' : 'Tugaskan' }}
+                                            </button>
+                                        </form>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -137,7 +197,7 @@
         </div>
     </main>
 
-    <!-- MODAL POPUP (SEMUA DISIMPANKAN DI LUAR TABEL & DIBERI DISPLAY NONE) -->
+    <!-- MODAL POPUP RINCIAN PESANAN & BUKTI TRANSFER -->
     @foreach($orders as $order)
         <div id="modal-{{ $order->id }}" class="modal-overlay">
             <div class="modal-box">
@@ -148,7 +208,23 @@
                 <div class="modal-body">
                     <p style="margin-bottom: 6px;"><strong>Customer:</strong> {{ $order->customer_name }} ({{ $order->customer_email }})</p>
                     <p style="margin-bottom: 6px;"><strong>Alamat Pengiriman:</strong> {{ $order->shipping_address }}</p>
+                    <p style="margin-bottom: 6px;"><strong>Metode Bayar:</strong> {{ strtoupper($order->payment_method ?? 'COD') }}</p>
                     <p style="margin-bottom: 12px;"><strong>Kurir Pengantar:</strong> {{ $order->courier_name ?? 'Belum Ditugaskan' }}</p>
+
+                    <!-- PREVIEW BUKTI PEMBAYARAN DI DALAM MODAL -->
+                    @if(strtolower($order->payment_method) == 'qris' && !empty($order->payment_proof))
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 14px; text-align: center;">
+                            <div style="font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">📸 Bukti Pembayaran QRIS Customer:</div>
+                            <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank">
+                                <img src="{{ asset('storage/' . $order->payment_proof) }}" alt="Bukti Pembayaran" style="max-width: 100%; max-height: 240px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                            </a>
+                            <div style="margin-top: 6px;">
+                                <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" style="font-size: 12px; color: #2563eb; font-weight: 600; text-decoration: underline;">
+                                    🔍 Buka Ukuran Penuh di Tab Baru
+                                </a>
+                            </div>
+                        </div>
+                    @endif
                     
                     <h4 style="margin-top: 15px; margin-bottom: 8px; color: #1e293b; font-size: 14px;">Produk yang Dipesan:</h4>
                     <table class="item-list-table">

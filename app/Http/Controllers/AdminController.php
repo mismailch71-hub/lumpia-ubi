@@ -72,30 +72,4 @@ class AdminController extends Controller
             'recentOrders'
         ));
     }
-
-    /**
-     * Konfirmasi Bukti Pembayaran QRIS Valid -> Ubah Status ke Diproses
-     */
-    public function verifyPayment($id)
-    {
-        DB::table('orders')->where('id', $id)->update([
-            'status'     => 'diproses',
-            'updated_at' => now(),
-        ]);
-
-        return back()->with('success', 'Pembayaran QRIS untuk pesanan #ORD-' . $id . ' dikonfirmasi VALID! Pesanan siap ditugaskan ke kurir.');
-    }
-
-    /**
-     * Tolak Bukti Pembayaran QRIS Tidak Valid / Palsu
-     */
-    public function rejectPayment($id)
-    {
-        DB::table('orders')->where('id', $id)->update([
-            'status'     => 'ditolak',
-            'updated_at' => now(),
-        ]);
-
-        return back()->with('error', 'Bukti pembayaran pesanan #ORD-' . $id . ' ditolak.');
-    }
 }
