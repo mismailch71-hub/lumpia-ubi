@@ -1,5 +1,5 @@
 /* ==========================================
-   1. STYLE HALAMAN RIWAYAT PESANAN (ORDERS)
+1. STYLE HALAMAN RIWAYAT PESANAN (ORDERS)
    ========================================== */
 .customer-order-card {
     background: #ffffff;
@@ -42,7 +42,7 @@
 }
 
 /* ==========================================
-   2. STYLE KATALOG PRODUK (DESKTOP 2 KOLOM)
+2. STYLE KATALOG PRODUK (DESKTOP 2 KOLOM)
    ========================================== */
 .product-grid {
     display: grid;
@@ -125,7 +125,7 @@
 }
 
 /* ==========================================
-   3. MODAL CHECKOUT & SUMMARY GOFOOD STYLE
+3. MODAL CHECKOUT & SUMMARY GOFOOD STYLE
    ========================================== */
 .modal-backdrop {
     position: fixed;
@@ -221,7 +221,7 @@
 }
 
 /* ==========================================
-   4. HEADER FLEX & TOGGLE LAYOUT (DESKTOP)
+4. HEADER FLEX & TOGGLE LAYOUT (DESKTOP)
    ========================================== */
 .mobile-top-header {
     display: none;
@@ -322,7 +322,149 @@ body.layout-bottom .main-content {
 }
 
 /* ==========================================
-   5. RESPONSIVE MOBILE VIEW (LAYAR HP <= 768px)
+5. PROMO, STOK, POIN, KERANJANG & CHAT KURIR
+   ========================================== */
+.promo-banner-box {
+    background: linear-gradient(135deg, #2e073f 0%, #6b21a8 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.promo-pill {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.points-badge {
+    background: #f3e8ff;
+    color: #581c87;
+    border: 1px solid #d8b4fe;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.stock-tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #166534;
+    background: #dcfce7;
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+}
+
+.cart-floating-btn {
+    background: #ffffff;
+    color: #581c87;
+    border: none;
+    padding: 9px 15px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.cart-picker-box {
+    background: #faf5ff;
+    border: 1px solid #e9d5ff;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 14px;
+}
+
+.cart-picker-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 0.7fr auto;
+    gap: 8px;
+    align-items: end;
+}
+
+.cart-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: #f8fafc;
+    flex-wrap: wrap;
+}
+
+.qty-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.qty-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.chat-box-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 12px;
+}
+
+.chat-messages-area {
+    max-height: 160px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.chat-msg-item {
+    margin-bottom: 6px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: #f3e8ff;
+    color: #2e073f;
+}
+
+.chat-input-row {
+    display: flex;
+    gap: 8px;
+}
+
+.rating-box-row {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #cbd5e1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ==========================================
+6. RESPONSIVE MOBILE VIEW (LAYAR HP <= 768px)
    ========================================== */
 @media (max-width: 768px) {
     .mobile-top-header {
@@ -485,10 +627,14 @@ body.layout-bottom .main-content {
         overflow-y: auto;
         padding: 16px !important;
     }
+
+    .cart-picker-grid {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 /* ==========================================
-   KOTAK & UKURAN GAMBAR QRIS AGAR PAS
+7. KOTAK & UKURAN GAMBAR QRIS AGAR PAS
    ========================================== */
 .payment-instruction-box {
     background: #f8fafc;
@@ -515,8 +661,184 @@ body.layout-bottom .main-content {
     transition: transform 0.2s ease;
 }
 
-/* Alternatif: Saat gambar diklik/sentuh, sedikit membesar agar mudah di-scan */
 .qris-image-preview:hover,
 .qris-image-preview:active {
     transform: scale(1.15);
+}
+
+.promo-banner-box p {
+    margin: 8px 0 0 0;
+    font-size: 13px;
+}
+
+.header-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.product-card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.btn-checkout-dark {
+    background: #3b0764;
+    color: #ffffff;
+}
+
+.product-grid-empty {
+    grid-column: 1 / -1;
+}
+
+.modal-hidden {
+    display: none;
+}
+
+.modal-scrollable {
+    max-height: 92vh;
+    overflow-y: auto;
+}
+
+.cart-picker-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #581c87;
+    margin-bottom: 8px;
+}
+
+.form-group-compact {
+    margin-bottom: 0;
+}
+
+.label-sm {
+    font-size: 12px;
+}
+
+.label-no-margin {
+    margin-bottom: 0;
+}
+
+.btn-add-cart-inline {
+    height: 38px;
+}
+
+.cart-items-container {
+    margin-bottom: 14px;
+}
+
+.text-danger-star {
+    color: #dc2626;
+}
+
+.help-text-muted {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.location-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+
+.btn-location-detect {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.location-status-text {
+    color: #6b21a8;
+    font-size: 11px;
+    display: block;
+    margin-top: 4px;
+}
+
+.qris-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.qris-brand {
+    color: #6b21a8;
+}
+
+.qris-desc {
+    font-size: 11px;
+    color: #64748b;
+    margin: 4px 0;
+}
+
+.payment-proof-box {
+    margin-top: 10px;
+}
+
+.file-input-compact {
+    padding: 6px;
+}
+
+.modal-footer-actions {
+    text-align: right;
+    margin-top: 15px;
+}
+
+.order-date-text {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.order-wa-text {
+    font-size: 12px;
+    color: #475569;
+    margin-top: 2px;
+}
+
+.order-total-row {
+    margin-top: 8px;
+}
+
+.chat-box-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #581c87;
+    margin-bottom: 6px;
+}
+
+.chat-input-field {
+    font-size: 12px;
+    padding: 7px 10px;
+}
+
+.chat-send-btn {
+    padding: 7px 14px;
+    font-size: 12px;
+}
+
+.rating-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.rating-select {
+    width: auto;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.rating-submit-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+}
+
+.rating-status-text {
+    font-size: 12px;
+    color: #166534;
+    font-weight: 600;
 }

@@ -18,6 +18,10 @@ Route::get('/', function () {
     return view('welcome', compact('products'));
 });
 
+// Route::get('/', function () {
+//     return view('maintenance');
+// });
+
 // 2. Route Autentikasi Manual (Guest)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -46,6 +50,7 @@ Route::get('/dashboard', function () {
     // Jika Role Customer -> Ke Halaman Pesanan Customer
     return redirect()->route('customer.orders.index');
 })->middleware('auth')->name('dashboard');
+
 // Group Route Khusus Admin
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     
@@ -60,6 +65,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // CRUD Produk Lumpia Ubi
     Route::resource('products', ProductController::class);
 
+    // Menu Promo
+    Route::get('/promos', function () {
+        return view('admin.promos.index');
+    })->name('promos.index');
+    Route::post('/promos', function (\Illuminate\Http\Request $request) {
+        return back()->with('success', 'Pengaturan promo berhasil diperbarui.');
+    })->name('promos.store');
+
+    // Menu Ulasan & Rating
+    Route::get('/reviews', function () {
+        $orders = \Illuminate\Support\Facades\DB::table('orders')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('admin.reviews.index', compact('orders'));
+    })->name('reviews.index');
+
     // Kelola Daftar Kurir (Dinamis)
     Route::get('/couriers', [CourierController::class, 'index'])->name('couriers.index');
     Route::post('/couriers', [CourierController::class, 'store'])->name('couriers.store');
@@ -69,12 +91,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
 
-    // 📈 Laporan Penjualan (BARU)
+    // Laporan Penjualan
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
-    // Route untuk Verifikasi & Tolak Bukti Pembayaran QRIS
-    Route::post('/admin/orders/{id}/verify', [AdminOrderController::class, 'verifyPayment'])->name('admin.orders.verify');
-    Route::post('/admin/orders/{id}/reject', [AdminOrderController::class, 'rejectPayment'])->name('admin.orders.reject');
+    // Verifikasi & Tolak Bukti Pembayaran QRIS
+    Route::post('/orders/{id}/verify', [AdminOrderController::class, 'verifyPayment'])->name('orders.verify');
+    Route::post('/orders/{id}/reject', [AdminOrderController::class, 'rejectPayment'])->name('orders.reject');
 });
 
 Route::middleware(['auth', 'role:kurir'])->prefix('courier')->name('courier.')->group(function () {
@@ -90,4 +112,10 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
     Route::get('/catalog', [CustomerOrderController::class, 'catalog'])->name('catalog');
     Route::post('/orders/store', [CustomerOrderController::class, 'storeOrder'])->name('orders.store');
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
+
+    Route::get('/profile', function () {
+        return view('customer.profile', ['user' => auth()->user()]);
+    })->name('profile');
+
+    Route::put('/profile', [CustomerOrderController::class, 'updateProfile'])->name('profile.update');
 });

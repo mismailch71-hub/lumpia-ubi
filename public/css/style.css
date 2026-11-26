@@ -81,6 +81,26 @@ body {
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
+/* TOMBOL MULAI PESAN (DI AREA UNGU / HERO / SIDEBAR) */
+.btn-mulai-pesan {
+    display: inline-block;
+    background-color: #f59e0b; /* Amber Gold agar kontras di atas ungu */
+    color: #2e0743;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 11px 18px;
+    border-radius: 12px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    margin-top: 14px;
+    transition: background-color 0.2s, color 0.2s;
+}
+.btn-mulai-pesan:hover {
+    background-color: #d97706;
+    color: #ffffff;
+}
+
 /* KATALOG PRODUK */
 .katalog {
     max-width: 1200px;
@@ -177,6 +197,7 @@ body {
 }
 .btn-order:hover {
     background-color: #581c87;
+    color: #ffffff;
 }
 
 /* FOOTER */

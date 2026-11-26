@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lumpia Ubi Store - Toko Online</title>
-    
+
     <!-- MENGGUNAKAN ARSITEKTUR CSS SERAGAM DENGAN MODUL CUSTOMER -->
     <link rel="stylesheet" href="{{ asset('css/admin-style.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/courier-style.css') }}?v={{ time() }}">
@@ -14,44 +14,43 @@
 
     <!-- HEADER ATAS KHUSUS TAMPILAN HP -->
     <div class="mobile-top-header">
-        <span>🥟</span> Lumpia Ubi Store
+        <img src="{{ asset('images/logo-lumbi.jpeg') }}"
+             onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
+             alt="Logo Lumbi Uwuu"
+             style="height: 26px; width: auto; object-fit: contain; vertical-align: middle; margin-right: 8px;">
+        <span>Lumbi Uwuu Store</span>
     </div>
 
     <!-- SIDEBAR / NAVIGASI UTAMA -->
     <aside class="sidebar">
         <div>
-            <div class="sidebar-brand">
-                <span>🥟</span> Lumpia Ubi Store
+            <div class="sidebar-brand" style="display: flex; align-items: center; gap: 8px;">
+                <img src="{{ asset('images/logo-lumbi.jpeg') }}"
+                     onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
+                     alt="Logo Lumbi Uwuu"
+                     style="height: 30px; width: auto; object-fit: contain;">
+                <span>Lumbi Uwuu Store</span>
             </div>
             <ul class="sidebar-menu">
-                <li><a href="{{ url('/') }}" class="active">🏠 Beranda & Katalog</a></li>
-                @auth
-                    @if(auth()->user()->hasRole('admin'))
-                        <li><a href="{{ route('admin.dashboard') }}">⚙️ Dashboard Admin</a></li>
-                    @elseif(auth()->user()->hasRole('kurir'))
-                        <li><a href="{{ route('kurir.dashboard') }}">🛵 Dashboard Kurir</a></li>
-                    @else
-                        <li><a href="{{ route('customer.catalog') }}">🛍️ Katalog Member</a></li>
-                        <li><a href="{{ route('customer.orders.index') }}">📦 Pesanan Saya</a></li>
-                    @endif
-                @else
-                    <li><a href="{{ route('login') }}">🔑 Masuk / Login</a></li>
-                    @if (Route::has('register'))
-                        <li><a href="{{ route('register') }}">📝 Daftar Akun</a></li>
-                    @endif
-                @endauth
+                <li><a href="{{ url('/') }}" class="active">Beranda</a></li>
+                <li><a href="{{ route('login') }}">Login</a></li>
+                @if (Route::has('register'))
+                    <li><a href="{{ route('register') }}">Daftar Akun</a></li>
+                @endif
             </ul>
         </div>
 
         @auth
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="btn-logout">🚪 Keluar / Logout</button>
+                <button type="submit" class="btn-logout">Logout</button>
             </form>
         @else
             <div style="padding: 10px 0;">
-                <a href="{{ route('login') }}" class="btn-submit-small btn-online" style="display: block; text-align: center; text-decoration: none;">
-                    🛒 Mulai Pesan
+                <a href="{{ route('login') }}"
+                   class="btn-submit-small btn-online btn-mulai-pesan"
+                   style="display: block; text-align: center; text-decoration: none; background-color: #f59e0b; color: #2e0743; padding: 10px 14px; border-radius: 10px; font-weight: 800;">
+                    Mulai Pesan
                 </a>
             </div>
         @endauth
@@ -59,60 +58,54 @@
 
     <!-- KONTEN UTAMA -->
     <main class="main-content">
-        <!-- HEADER DENGAN TOMBOL GANTI POSISI SIDEBAR -->
-        <div class="header-flex">
-            <div class="header-title" style="margin-bottom: 0;">
-                <h2>🥟 Lumpia Ubi Renyah & Manis</h2>
-                <p>Dibuat segar setiap hari dengan lelehan topping melimpah, siap diantar hangat ke tempatmu!</p>
-            </div>
-
+        <!-- TOMBOL GANTI POSISI SIDEBAR -->
+        <div class="header-flex" style="justify-content: flex-end;">
             <button type="button" id="btnToggleLayout" class="btn-layout-toggle" onclick="toggleSidebarPosition()">
-                ⬇️ Pindah Menu ke Bawah
+                Pindah Menu ke Bawah
             </button>
         </div>
 
-        <!-- HERO BANNER PROMO -->
-        <div class="customer-order-card" style="background: linear-gradient(135deg, #2e073f 0%, #6b21a8 100%); color: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-top: 16px;">
-            <div style="flex: 1; min-width: 240px;">
-                <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">
-                    🔥 Freshly Made Every Day
-                </span>
-                <h3 style="margin: 10px 0 6px 0; font-size: 20px;">Nikmati Kelezatan Lumpia Ubi Lumer!</h3>
-                <p style="margin: 0; font-size: 13px; color: #f3e8ff; line-height: 1.5;">
-                    Tersedia pilihan porsi <strong>Medium (4+1)</strong> dan <strong>Large (6+2)</strong>. Pesan sekarang dan pantau pengantaran kurir secara langsung.
-                </p>
+        <!-- HERO BANNER PROMO (GABUNGAN TEKS & GAMBAR DI ATAS) -->
+        <div class="customer-order-card" style="background: linear-gradient(135deg, #2e073f 0%, #6b21a8 100%); color: #ffffff; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; margin-top: 12px;">
+            <div style="width: 100%; max-width: 520px; margin: 0 auto;">
+                <img src="{{ asset('images/lumpia-banner.jpeg') }}"
+                     onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/lumpia-default.jpeg') }}'; } else { this.src='{{ asset('images/lumpia-default.jpg') }}'; }"
+                     alt="Lumpia Ubi Utama"
+                     style="width: 100%; aspect-ratio: 16 / 9; max-height: 280px; object-fit: cover; border-radius: 12px; border: 2px solid rgba(255,255,255,0.25); display: block;">
             </div>
             <div>
-                <img src="{{ asset('images/lumpia-default.jpg') }}" 
-                     onerror="this.src='{{ asset('images/lumpia-default.jpeg') }}'" 
-                     alt="Lumpia Ubi Utama" 
-                     style="width: 130px; height: 95px; object-fit: cover; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3);">
+                <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;">
+                    Freshly Made Every Day
+                </span>
+                <p style="margin: 10px 0 0 0; font-size: 14px; color: #ffffff; line-height: 1.6; font-weight: 500;">
+                    Waktunya ngemil enak bareng <strong>Lumpia Ubi Lumer</strong>! Bebas pilih ukuran sesuai selera, mulai dari <strong>Medium (4+1)</strong> sampai <strong>Large (6+2)</strong> yang lebih puas. Pesan sekarang juga, kamu tinggal duduk manis sambil pantau perjalanan pesananmu hingga tiba!
+                </p>
             </div>
         </div>
 
         <!-- KATALOG PRODUK 2 KOLOM -->
         <div class="header-title" style="margin-top: 24px;">
-            <h3 style="margin: 0; color: #1e293b;">🛍️ Pilihan Varian Lumpia Ubi</h3>
+            <h3 style="margin: 0; color: #1e293b;">Pilihan Varian Lumpia Ubi</h3>
             <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Pilih varian rasa dan ukuran porsi sesuai selera kamu.</p>
         </div>
 
         <div class="product-grid">
             @forelse($products as $product)
                 @php
-                    $imgUrl = (!empty($product->image) && file_exists(public_path('storage/' . $product->image))) 
-                        ? asset('storage/' . $product->image) 
-                        : asset('images/lumpia-default.jpg');
+                    $imgUrl = (!empty($product->image) && file_exists(public_path('storage/' . $product->image)))
+                        ? asset('storage/' . $product->image)
+                        : asset('images/lumpia-default.jpeg');
                 @endphp
                 <div class="product-card">
                     <!-- GAMBAR PRODUK -->
                     <div class="product-image-box">
-                        <img src="{{ $imgUrl }}" alt="{{ $product->name }}" onerror="this.src='{{ asset('images/lumpia-default.jpeg') }}'">
+                        <img src="{{ $imgUrl }}" alt="{{ $product->name }}" onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/lumpia-default.jpg') }}'; }">
                     </div>
 
                     <div class="product-info">
                         <h3 class="product-card-title">{{ $product->name }}</h3>
                         <p class="product-card-desc">{{ $product->description ?? 'Sensasi kulit renyah di luar dengan isian ubi lembut dan lumer di dalam.' }}</p>
-                        
+
                         <div class="product-price-box">
                             <span class="price-tag">Medium (4+1): Rp {{ number_format($product->price_medium, 0, ',', '.') }}</span>
                             <span class="price-tag">Large (6+2): Rp {{ number_format($product->price_large, 0, ',', '.') }}</span>
@@ -121,13 +114,15 @@
 
                     <!-- TOMBOL AKSI: JIKA SUDAH LOGIN BUKA MODAL, JIKA BELUM ARAHKAN KE LOGIN -->
                     @auth
-                        <button type="button" class="btn-submit-small btn-online btn-order-trigger" 
+                        <button type="button" class="btn-submit-small btn-online btn-order-trigger"
                                 onclick="openOrderModal('{{ $product->id }}', '{{ addslashes($product->name) }}', '{{ addslashes($product->description ?? '') }}', '{{ $product->price_medium }}', '{{ $product->price_large }}', '{{ $imgUrl }}')">
-                            🛒 Pesan Sekarang
+                            Pesan Sekarang
                         </button>
                     @else
-                        <a href="{{ route('login') }}" class="btn-submit-small btn-online btn-order-trigger" style="display: block; text-align: center; text-decoration: none;">
-                            🔑 Masuk untuk Memesan
+                        <a href="{{ route('login') }}"
+                           class="btn-submit-small btn-online btn-order-trigger"
+                           style="display: block; text-align: center; text-decoration: none; background-color: #6b21a8; color: #ffffff; padding: 10px 14px; border-radius: 10px; font-weight: 700; margin-top: 10px;">
+                            Masuk untuk Memesan
                         </a>
                     @endauth
                 </div>
@@ -139,9 +134,21 @@
         </div>
 
         <!-- FOOTER -->
-        <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; color: #64748b; font-size: 13px;">
-            <p style="margin: 0;">&copy; {{ date('Y') }} Lumpia Ubi Store. Hak Cipta Dilindungi.</p>
-        </footer>
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; color: #64748b; font-size: 13px;">
+            <p style="margin: 0 0 8px 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;">
+                <span>Ikuti &amp; pantau info di Instagram:</span>
+                <a href="https://www.instagram.com/lumbi_uwuu/" target="_blank" rel="noopener noreferrer"
+                    style="display: inline-flex; align-items: center; gap: 5px; color: #6b21a8; font-weight: 700; text-decoration: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+                    </svg>
+                    <span>@lumbi_uwuu</span>
+                </a>
+            </p>
+            <p style="margin: 0;">&copy; {{ date('Y') }} Lumbi Uwuu Store. Hak Cipta Dilindungi.</p>
+        </div>
     </main>
 
     <!-- MODAL POPUP CHECKOUT (AKTIF JIKA USER SUDAH LOGIN) -->
@@ -149,12 +156,12 @@
         <div id="orderModal" class="modal-backdrop" style="display: none;">
             <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
                 <div class="modal-header">
-                    <h3>🛒 Konfirmasi Checkout</h3>
-                    <button type="button" class="btn-close-modal" onclick="closeOrderModal()">✖</button>
+                    <h3>Konfirmasi Checkout</h3>
+                    <button type="button" class="btn-close-modal" onclick="closeOrderModal()">x</button>
                 </div>
-                
+
                 <div class="modal-product-summary">
-                    <img id="modalProductImg" src="{{ asset('images/lumpia-default.jpg') }}" onerror="this.src='{{ asset('images/lumpia-default.jpeg') }}'" alt="Produk" class="modal-product-img">
+                    <img id="modalProductImg" src="{{ asset('images/lumpia-default.jpeg') }}" onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/lumpia-default.jpg') }}'; }" alt="Produk" class="modal-product-img">
                     <div class="modal-product-detail">
                         <h4 id="modalProductName">Nama Produk</h4>
                         <p id="modalProductDesc">Deskripsi singkat produk...</p>
@@ -164,7 +171,7 @@
                 <form action="{{ route('customer.orders.store') }}" method="POST" enctype="multipart/form-data" class="form-order-catalog">
                     @csrf
                     <input type="hidden" name="product_id" id="modalProductId">
-                    
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div class="form-group">
                             <label>Varian Ukuran</label>
@@ -187,8 +194,8 @@
                     <div class="form-group">
                         <label>Metode Pembayaran</label>
                         <select name="payment_method" id="modalPaymentMethod" class="form-control" onchange="handlePaymentMethodChange()" required>
-                            <option value="cod">💵 COD (Bayar Cash di Tempat)</option>
-                            <option value="qris">📱 Scan QRIS (DANA, GoPay, OVO, ShopeePay, M-Banking)</option>
+                            <option value="cod">COD (Bayar Cash di Tempat)</option>
+                            <option value="qris">Scan QRIS (DANA, GoPay, OVO, ShopeePay, M-Banking)</option>
                         </select>
                     </div>
 
@@ -202,7 +209,7 @@
                         </p>
                         <img src="{{ asset('images/qris-lumbi.jpeg') }}" alt="QRIS LUMBI UWUUU" class="qris-image-preview">
                         <a href="{{ asset('images/qris-lumbi.jpeg') }}" download="QRIS-LUMBI-UWUUU.jpg" style="font-size: 11px; color: #6b21a8; font-weight: 600; text-decoration: underline;">
-                            ⬇️ Unduh Gambar QRIS (Jika scan dari galeri HP)
+                            Unduh Gambar QRIS (Jika scan dari galeri HP)
                         </a>
                     </div>
 

@@ -10,42 +10,69 @@
 </head>
 <body class="admin-body">
 
-    <!-- HEADER ATAS KHUSUS TAMPILAN HP -->
+    @php
+        $currentUser = $user ?? auth()->user();
+        $userPoints = $currentUser->points ?? 0;
+    @endphp
+
     <div class="mobile-top-header">
-        <span>🥟</span> Lumpia Ubi Store
+        <span>Lumpia Ubi Store</span>
     </div>
 
-    <!-- SIDEBAR CUSTOMER -->
     <aside class="sidebar">
         <div>
             <div class="sidebar-brand">
-                <span>🥟</span> Lumpia Ubi Store
+                <span>Lumpia Ubi Store</span>
             </div>
             <ul class="sidebar-menu">
-                <li><a href="{{ route('customer.catalog') }}" class="active">🛍️ Katalog Produk</a></li>
-                <li><a href="{{ route('customer.orders.index') }}">📦 Pesanan Saya</a></li>
+                <li><a href="{{ route('customer.orders.index') }}">Pesanan</a></li>
+                <li><a href="{{ route('customer.catalog') }}" class="active">Katalog</a></li>
+                <li>
+                    <a href="{{ \Illuminate\Support\Facades\Route::has('customer.profile') ? route('customer.profile') : '#profil-section' }}" onclick="openProfileModalIfNeeded(event)">
+                        Profil
+                    </a>
+                </li>
             </ul>
         </div>
 
         <form action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="submit" class="btn-logout">🚪 Keluar / Logout</button>
+            <button type="submit" class="btn-logout">Logout</button>
         </form>
     </aside>
 
-    <!-- KONTEN UTAMA -->
     <main class="main-content">
-        <!-- HEADER DENGAN TOMBOL GANTI POSISI SIDEBAR -->
-        <div class="header-flex">
-            <div class="header-title" style="margin-bottom: 0;">
-                <h2>🛍️ Katalog Lumpia Ubi</h2>
-                <p>Pilih varian Lumpia Ubi favorit Anda dan pesan dengan cepat.</p>
+        <div class="promo-banner-box">
+            <div>
+                <span class="promo-pill">Pemberitahuan Promo</span>
+                <p style="margin: 8px 0 0 0; font-size: 13px;">
+                    Ongkir <strong>Rp 0</strong> untuk area <strong>Kampus Unram</strong>! Di luar Unram hanya <strong>Rp 1.000 / km</strong> dan dapat <strong>+1 Poin</strong> setiap beli <strong>1 produk</strong>.
+                </p>
             </div>
-
-            <button type="button" id="btnToggleLayout" class="btn-layout-toggle" onclick="toggleSidebarPosition()">
-                ⬇️ Pindah Menu ke Bawah
+            <button type="button" class="cart-floating-btn" onclick="openCartModal()">
+                Keranjang (<span id="cartCountBadge">0</span>)
             </button>
         </div>
+
+        <div class="header-flex">
+            <div class="header-title" style="margin-bottom: 0;">
+                <h2>Katalog Lumpia Ubi</h2>
+                <p>Bisa pilih Coklat, Keju, dan Mix sekaligus dalam satu keranjang.</p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span class="points-badge">Poin Kamu: <span id="userPointsDisplay">{{ $userPoints }}</span> Poin</span>
+                <button type="button" id="btnToggleLayout" class="btn-layout-toggle" onclick="toggleSidebarPosition()">
+                    Pindah Menu ke Bawah
+                </button>
+            </div>
+        </div>
+
+        @if(session('success'))
+            <div class="alert-success-custom" style="margin-bottom: 16px;">
+                {{ session('success') }}
+            </div>
+        @endif
 
         <div class="product-grid">
             @forelse($products as $product)
@@ -53,14 +80,15 @@
                     $imgUrl = (!empty($product->image) && file_exists(public_path('storage/' . $product->image))) 
                         ? asset('storage/' . $product->image) 
                         : asset('images/lumpia-default.jpg');
+                    $stockQty = $product->stock ?? 25;
                 @endphp
                 <div class="product-card">
-                    <!-- GAMBAR PRODUK -->
                     <div class="product-image-box">
                         <img src="{{ $imgUrl }}" alt="{{ $product->name }}" onerror="this.src='{{ asset('images/lumpia-default.jpeg') }}'">
                     </div>
 
                     <div class="product-info">
+                        <span class="stock-tag">Stok: <span class="js-stock-val" data-product-id="{{ $product->id }}">{{ $stockQty }}</span></span>
                         <h3 class="product-card-title">{{ $product->name }}</h3>
                         <p class="product-card-desc">{{ $product->description ?? 'Lumpia Ubi renyah dengan isian manis/gurih yang melumer di mulut.' }}</p>
                         
@@ -70,11 +98,16 @@
                         </div>
                     </div>
 
-                    <!-- TOMBOL BUKA MODAL PESAN -->
-                    <button type="button" class="btn-submit-small btn-online btn-order-trigger" 
-                            onclick="openOrderModal('{{ $product->id }}', '{{ addslashes($product->name) }}', '{{ addslashes($product->description ?? '') }}', '{{ $product->price_medium }}', '{{ $product->price_large }}', '{{ $imgUrl }}')">
-                        🛒 Pesan Sekarang
-                    </button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button type="button" class="btn-submit-small btn-online"
+                                onclick="quickAddToCart('{{ $product->id }}', '{{ addslashes($product->name) }}', '{{ $product->price_medium }}', '{{ $product->price_large }}', '{{ $imgUrl }}')">
+                            + Keranjang
+                        </button>
+                        <button type="button" class="btn-submit-small" style="background: #3b0764; color: #fff;"
+                                onclick="openCartModalWithItem('{{ $product->id }}', '{{ addslashes($product->name) }}', '{{ $product->price_medium }}', '{{ $product->price_large }}', '{{ $imgUrl }}')">
+                            Checkout
+                        </button>
+                    </div>
                 </div>
             @empty
                 <div class="empty-state-box" style="grid-column: 1 / -1;">
@@ -84,93 +117,126 @@
         </div>
     </main>
 
-    <!-- MODAL POPUP CHECKOUT INTERAKSI GOFOOD STYLE -->
     <div id="orderModal" class="modal-backdrop" style="display: none;">
-        <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
+        <div class="modal-content" style="max-height: 92vh; overflow-y: auto;">
             <div class="modal-header">
-                <h3>🛒 Konfirmasi Checkout</h3>
-                <button type="button" class="btn-close-modal" onclick="closeOrderModal()">✖</button>
-            </div>
-            
-            <!-- RINGKASAN PRODUK & FOTO -->
-            <div class="modal-product-summary">
-                <img id="modalProductImg" src="{{ asset('images/lumpia-default.jpg') }}" onerror="this.src='{{ asset('images/lumpia-default.jpeg') }}'" alt="Produk" class="modal-product-img">
-                <div class="modal-product-detail">
-                    <h4 id="modalProductName">Nama Produk</h4>
-                    <p id="modalProductDesc">Deskripsi singkat produk...</p>
-                </div>
+                <h3>Keranjang &amp; Checkout</h3>
+                <button type="button" class="btn-close-modal" onclick="closeOrderModal()">x</button>
             </div>
 
-            <form action="{{ route('customer.orders.store') }}" method="POST" enctype="multipart/form-data" class="form-order-catalog">
-                @csrf
-                <input type="hidden" name="product_id" id="modalProductId">
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <!-- PILIH VARIAN UKURAN -->
-                    <div class="form-group">
-                        <label>Varian Ukuran</label>
-                        <select name="variant" id="modalVariant" class="form-control" onchange="calculateTotal()" required>
-                            <!-- Dynamic via JS -->
+            <div class="cart-picker-box">
+                <div style="font-size: 13px; font-weight: 700; color: #581c87; margin-bottom: 8px;">
+                    Tambah Varian ke Keranjang (Bisa Coklat, Keju, Mix Sekaligus)
+                </div>
+                <div class="cart-picker-grid">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Varian Rasa</label>
+                        <select id="pickerProduct" class="form-control">
+                            @foreach($products as $p)
+                                <option value="{{ $p->id }}"
+                                        data-name="{{ $p->name }}"
+                                        data-medium="{{ $p->price_medium }}"
+                                        data-large="{{ $p->price_large }}"
+                                        data-stock="{{ $p->stock ?? 25 }}">
+                                    {{ $p->name }} (Stok: {{ $p->stock ?? 25 }})
+                                </option>
+                            @endforeach
                         </select>
                     </div>
-
-                    <!-- JUMLAH PESAN -->
-                    <div class="form-group">
-                        <label>Jumlah Pesan</label>
-                        <input type="number" name="quantity" id="modalQuantity" value="1" min="1" class="form-control" oninput="calculateTotal()" onchange="calculateTotal()" required>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Ukuran</label>
+                        <select id="pickerSize" class="form-control">
+                            <option value="medium">Medium</option>
+                            <option value="large">Large</option>
+                        </select>
                     </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Qty</label>
+                        <input type="number" id="pickerQty" class="form-control" value="1" min="1" max="25">
+                    </div>
+                    <button type="button" class="btn-submit-small btn-online" onclick="addPickerItemToCart()" style="height: 38px;">
+                        + Tambah
+                    </button>
                 </div>
+            </div>
 
-                <!-- ALAMAT PENGIRIMAN (AUTO-FILL DARI PROFILE) -->
+            <div id="cartItemsContainer" style="margin-bottom: 14px;"></div>
+
+            <form action="{{ route('customer.orders.store') }}" method="POST" enctype="multipart/form-data" class="form-order-catalog" onsubmit="return prepareCartSubmission()">
+                @csrf
+                <input type="hidden" name="cart_items" id="cartItemsInput">
+                <input type="hidden" name="shipping_cost" id="shippingCostInput" value="0">
+                <input type="hidden" name="distance_km" id="distanceKmInput" value="0">
+                <input type="hidden" name="latitude" id="latInput">
+                <input type="hidden" name="longitude" id="lngInput">
+                <input type="hidden" name="earned_points" id="earnedPointsInput" value="0">
+
                 <div class="form-group">
-                    <label>Alamat Pengiriman</label>
-                    <textarea name="shipping_address" class="form-control" rows="2" placeholder="Masukkan alamat lengkap pengiriman..." required>{{ $user->alamat ?? $user->address ?? '' }}</textarea>
+                    <label>Nomor HP WhatsApp (Untuk Verifikasi Sudah Bayar) <span style="color: #dc2626;">*</span></label>
+                    <input type="tel" name="whatsapp_phone" id="customerWaPhone" class="form-control"
+                           value="{{ $currentUser->phone ?? $currentUser->no_hp ?? $currentUser->whatsapp ?? '' }}"
+                           placeholder="Contoh: 081234567890" required>
+                    <small style="color: #64748b; font-size: 11px;">Dipakai untuk konfirmasi &amp; verifikasi status pembayaran pesanan Anda.</small>
                 </div>
 
-                <!-- METODE PEMBAYARAN (COD & QRIS SAJA) -->
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+                        <label style="margin-bottom: 0;">Lokasi Saat Ini / Tujuan (Sumber: Kampus Unram)</label>
+                        <button type="button" class="btn-layout-toggle" onclick="detectCurrentLocation()" style="padding: 5px 10px; font-size: 12px;">
+                            Gunakan Lokasi Saat Ini
+                        </button>
+                    </div>
+                    <textarea name="shipping_address" id="shippingAddressInput" class="form-control" rows="2"
+                              placeholder="Masukkan alamat lengkap atau klik Gunakan Lokasi Saat Ini..." required>{{ $currentUser->alamat ?? $currentUser->address ?? '' }}</textarea>
+                    <small id="locationStatusText" style="color: #6b21a8; font-size: 11px; display: block; margin-top: 4px;">
+                        Titik acuan: Kampus Universitas Mataram (Unram). Di area Unram = Rp 0, di luar Unram = Rp 1.000 / km.
+                    </small>
+                </div>
+
                 <div class="form-group">
                     <label>Metode Pembayaran</label>
                     <select name="payment_method" id="modalPaymentMethod" class="form-control" onchange="handlePaymentMethodChange()" required>
-                        <option value="cod">💵 COD (Bayar Cash di Tempat)</option>
-                        <option value="qris">📱 Scan QRIS (DANA, GoPay, OVO, ShopeePay, M-Banking)</option>
+                        <option value="cod">COD (Bayar Cash di Tempat)</option>
+                        <option value="qris">Scan QRIS (DANA, GoPay, OVO, ShopeePay, M-Banking)</option>
                     </select>
                 </div>
 
-                <!-- KOTAK SCAN QRIS (MUNCUL OTOMATIS JIKA PILIH QRIS) -->
                 <div id="qrisPaymentBox" class="payment-instruction-box" style="display: none;">
                     <div style="font-size: 13px; font-weight: 700; color: #1e293b;">
                         Scan QRIS: <span style="color: #6b21a8;">LUMBI UWUUU</span>
                     </div>
                     <p style="font-size: 11px; color: #64748b; margin: 4px 0;">
-                        Buka aplikasi DANA / GoPay / OVO / ShopeePay / M-Banking lalu scan kode di bawah ini:
+                        Setelah transfer/scan QRIS, unggah bukti bayar di bawah &amp; pastikan nomor WA sudah benar untuk verifikasi.
                     </p>
                     <img src="{{ asset('images/qris-lumbi.jpeg') }}" alt="QRIS LUMBI UWUUU" class="qris-image-preview">
-                    <a href="{{ asset('images/qris-lumbi.jpeg') }}" download="QRIS-LUMBI-UWUUU.jpg" style="font-size: 11px; color: #6b21a8; font-weight: 600; text-decoration: underline;">
-                        ⬇️ Unduh Gambar QRIS (Jika scan dari galeri HP)
-                    </a>
                 </div>
 
-                <!-- UPLOAD BUKTI PEMBAYARAN (WAJIB UNTUK QRIS) -->
                 <div id="paymentProofBox" class="form-group" style="display: none; margin-top: 10px;">
                     <label>Upload Bukti Pembayaran (Screenshot) <span style="color: #dc2626;">*</span></label>
                     <input type="file" name="payment_proof" id="modalPaymentProof" accept="image/*" class="form-control" style="padding: 6px;">
-                    <small style="color: #64748b; font-size: 11px;">Wajib unggah screenshot bukti pembayaran QRIS agar pesanan segera diproses.</small>
                 </div>
 
                 <div class="form-group">
                     <label>Catatan Pesanan (Opsional)</label>
-                    <input type="text" name="notes" class="form-control" placeholder="Misal: Pagar warna hitam / Tanpa cabe">
+                    <input type="text" name="notes" class="form-control" placeholder="Misal: Pagar warna hitam / Titip satpam">
                 </div>
 
-                <!-- RINGKASAN BIAYA TRANSAKSI REAL-TIME -->
                 <div class="order-summary-box">
                     <div class="summary-row">
                         <span>Subtotal Produk:</span>
                         <strong id="textSubtotal">Rp 0</strong>
                     </div>
                     <div class="summary-row">
-                        <span>Ongkos Kirim (Flat):</span>
-                        <strong id="textShipping">Rp 5.000</strong>
+                        <span>Jarak dari Unram:</span>
+                        <strong id="textDistance">0,0 km</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Ongkos Kirim (1 km = Rp 1.000):</span>
+                        <strong id="textShipping">Rp 0</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Estimasi Poin Didapat (+1 / produk):</span>
+                        <strong id="textPointsEarned">+0 Poin</strong>
                     </div>
                     <div class="summary-row total">
                         <span>Total Pembayaran:</span>
@@ -186,6 +252,47 @@
         </div>
     </div>
 
+    <div id="profileModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>Edit Profil Saya</h3>
+                <button type="button" class="btn-close-modal" onclick="closeProfileModal()">x</button>
+            </div>
+            <form action="{{ \Illuminate\Support\Facades\Route::has('customer.profile.update') ? route('customer.profile.update') : url('/customer/profile') }}"
+                  method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <div class="form-group">
+                    <label>Foto Profil</label>
+                    <input type="file" name="avatar" accept="image/*" class="form-control" style="padding: 6px;">
+                </div>
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" name="name" class="form-control" value="{{ $currentUser->name ?? '' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" value="{{ $currentUser->email ?? '' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Nomor HP / WhatsApp</label>
+                    <input type="tel" name="phone" class="form-control" value="{{ $currentUser->phone ?? $currentUser->no_hp ?? '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Alamat Pengiriman Utama</label>
+                    <textarea name="address" rows="2" class="form-control">{{ $currentUser->alamat ?? $currentUser->address ?? '' }}</textarea>
+                </div>
+                <div style="text-align: right; margin-top: 14px;">
+                    <button type="button" class="btn-cancel-edit" onclick="closeProfileModal()">Tutup</button>
+                    <button type="submit" class="btn-submit-small btn-online">Simpan Profil</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        window.LUMPIA_DEFAULT_IMG = "{{ asset('images/lumpia-default.jpg') }}";
+    </script>
     <script src="{{ asset('js/customer-script.js') }}?v={{ time() }}"></script>
 </body>
 </html>
