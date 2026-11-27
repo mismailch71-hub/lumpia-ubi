@@ -15,7 +15,7 @@ class CustomerOrderController extends Controller
     public function catalog()
     {
         $products = DB::table('products')->get();
-        $user = Auth::user(); // Ambil data customer untuk auto-fill alamat
+        $user = Auth::user();
 
         return view('customer.catalog', compact('products', 'user'));
     }
@@ -54,28 +54,47 @@ class CustomerOrderController extends Controller
     }
 
     /**
-     * Proses Pembuatan Pesanan Baru dari Katalog
+     * Proses Pembuatan Pesanan Baru dari Keranjang Katalog
      */
     public function storeOrder(Request $request)
     {
         $request->validate([
-            'product_id'       => 'required|exists:products,id',
-            'variant'          => 'required|in:medium,large',
-            'quantity'         => 'required|integer|min:1',
-            'shipping_address' => 'required|string',
+            'cart_items'       => 'required|string',
+            'whatsapp_phone'   => 'required|string|max:30',
+            'shipping_address' => 'required|string|max:500',
             'payment_method'   => 'required|in:cod,qris',
-            'payment_proof'    => 'required_if:payment_method,qris|nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'notes'            => 'nullable|string',
+            'payment_proof'    => 'required_if:payment_method,qris|nullable|file|mimes:jpeg,png,jpg,webp,jfif|max:4096',
+            'notes'            => 'nullable|string|max:255',
+            'shipping_cost'    => 'nullable|numeric|min:0',
+            'earned_points'    => 'nullable|integer|min:0',
         ], [
+            'cart_items.required'         => 'Keranjang masih kosong. Silakan tambahkan produk terlebih dahulu.',
+            'whatsapp_phone.required'     => 'Nomor HP WhatsApp wajib diisi untuk verifikasi pembayaran.',
             'payment_proof.required_if' => 'Anda wajib mengunggah bukti pembayaran (screenshot) untuk metode QRIS.',
         ]);
 
-        $product = DB::table('products')->where('id', $request->product_id)->first();
+        $items = json_decode($request->input('cart_items'), true);
+        if (!is_array($items) || count($items) === 0) {
+            return back()->withErrors([
+                'cart_items' => 'Keranjang masih kosong. Silakan tambahkan minimal 1 varian produk.'
+            ])->withInput();
+        }
 
-        // Tentukan harga satuan berdasarkan varian ukuran & tambahkan ongkir Rp 5.000
-        $unitPrice   = ($request->variant === 'large') ? $product->price_large : $product->price_medium;
-        $shippingFee = 5000;
-        $totalPrice  = ($unitPrice * $request->quantity) + $shippingFee;
+        $subtotal = 0;
+        $totalQty = 0;
+        $variantSummary = [];
+
+        foreach ($items as $item) {
+            $qty = max(1, (int) ($item['qty'] ?? 1));
+            $price = max(0, (int) ($item['price'] ?? 0));
+            $subtotal += $price * $qty;
+            $totalQty += $qty;
+            $sizeLabel = strtoupper($item['sizeLabel'] ?? ($item['size'] ?? 'MEDIUM'));
+            $variantSummary[] = ($item['name'] ?? 'Produk') . " ({$sizeLabel} x{$qty})";
+        }
+
+        $shippingFee = max(0, (int) $request->input('shipping_cost', 0));
+        $totalPrice  = $subtotal + $shippingFee;
 
         // Validasi anti-duplikat & simpan file bukti pembayaran QRIS
         $proofPath = null;
@@ -83,11 +102,8 @@ class CustomerOrderController extends Controller
 
         if ($request->hasFile('payment_proof')) {
             $file = $request->file('payment_proof');
-
-            // 1. Hitung sidik jari unik (MD5 hash) dari file gambar
             $proofHash = md5_file($file->getRealPath());
 
-            // 2. Tolak jika screenshot yang sama persis pernah dipakai di pesanan lain
             $isDuplicate = DB::table('orders')->where('proof_hash', $proofHash)->exists();
             if ($isDuplicate) {
                 return back()->withErrors([
@@ -95,43 +111,72 @@ class CustomerOrderController extends Controller
                 ])->withInput();
             }
 
-            // 3. Simpan ke storage/app/public/payment_proofs
             $proofPath = $file->store('payment_proofs', 'public');
         }
 
-        // Gabungkan catatan dengan informasi varian ukuran
-        $notesWithVariant = '[Varian: ' . strtoupper($request->variant) . '] ' . ($request->notes ?? '');
-
-        // Tentukan status awal: QRIS perlu verifikasi admin, COD langsung diproses
+        $notesCombined = '[' . implode(', ', $variantSummary) . '] ' . ($request->notes ?? '');
         $initialStatus = ($request->payment_method === 'qris') ? 'menunggu_verifikasi' : 'diproses';
 
-        // 1. Simpan data utama order
-        $orderId = DB::table('orders')->insertGetId([
-            'user_id'          => Auth::id(),
-            'total_price'      => $totalPrice,
-            'status'           => $initialStatus,
-            'payment_method'   => $request->payment_method,
-            'payment_proof'    => $proofPath,
-            'proof_hash'       => $proofHash,
-            'shipping_address' => $request->shipping_address,
-            'notes'            => trim($notesWithVariant),
-            'created_at'       => now(),
-            'updated_at'       => now(),
-        ]);
+        DB::beginTransaction();
+        try {
+            $orderId = DB::table('orders')->insertGetId([
+                'user_id'          => Auth::id(),
+                'total_price'      => $totalPrice,
+                'status'           => $initialStatus,
+                'payment_method'   => $request->payment_method,
+                'payment_proof'    => $proofPath,
+                'proof_hash'       => $proofHash,
+                'shipping_address' => $request->shipping_address,
+                'notes'            => trim($notesCombined),
+                'created_at'       => now(),
+                'updated_at'       => now(),
+            ]);
 
-        // 2. Simpan rincian item order
-        DB::table('order_items')->insert([
-            'order_id'   => $orderId,
-            'product_id' => $product->id,
-            'quantity'   => $request->quantity,
-            'price'      => $unitPrice,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+            foreach ($items as $item) {
+                $productId = (int) ($item['id'] ?? 0);
+                $qty = max(1, (int) ($item['qty'] ?? 1));
+                $unitPrice = max(0, (int) ($item['price'] ?? 0));
+
+                $product = DB::table('products')->where('id', $productId)->lockForUpdate()->first();
+                if ($product) {
+                    DB::table('order_items')->insert([
+                        'order_id'   => $orderId,
+                        'product_id' => $product->id,
+                        'quantity'   => $qty,
+                        'price'      => $unitPrice,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    $currentStock = (int) ($product->stock ?? 25);
+                    $newStock = max(0, $currentStock - $qty);
+                    DB::table('products')->where('id', $product->id)->update([
+                        'stock'      => $newStock,
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+
+            $earnedPoints = max(0, (int) $request->input('earned_points', $totalQty));
+            $user = Auth::user();
+            if ($user && isset($user->points)) {
+                DB::table('users')->where('id', $user->id)->update([
+                    'points'     => (int) ($user->points ?? 0) + $earnedPoints,
+                    'updated_at' => now(),
+                ]);
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->withErrors([
+                'order' => 'Terjadi kesalahan saat menyimpan pesanan: ' . $e->getMessage()
+            ])->withInput();
+        }
 
         $successMessage = ($request->payment_method === 'qris')
-            ? 'Pesanan berhasil dibuat! Pembayaran QRIS Anda sedang diverifikasi oleh Admin.'
-            : 'Pesanan COD berhasil dibuat! Admin akan segera memproses dan menugaskan kurir.';
+            ? 'Pesanan berhasil dibuat! Stok diperbarui dan pembayaran QRIS sedang diverifikasi oleh Admin.'
+            : 'Pesanan COD berhasil dibuat! Stok diperbarui dan pesanan sedang diproses.';
 
         return redirect()->route('customer.orders.index')->with('success', $successMessage);
     }

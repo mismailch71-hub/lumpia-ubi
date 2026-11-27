@@ -5,22 +5,39 @@
 
 function openModal(id) {
     const modal = document.getElementById(id);
-    if (modal) {
-        modal.classList.add('active');
-    }
+    if (!modal) return;
+
+    modal.classList.add('active');
+    modal.style.display = 'flex';
 }
 
 function closeModal(id) {
     const modal = document.getElementById(id);
-    if (modal) {
+    if (!modal) return;
+
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+}
+
+function closeAllModals() {
+    document.querySelectorAll('.modal-overlay').forEach(function (modal) {
         modal.classList.remove('active');
-    }
+        modal.style.display = 'none';
+    });
 }
 
 // Menutup modal saat klik area luar/overlay
 window.addEventListener('click', function (event) {
     if (event.target && event.target.classList.contains('modal-overlay')) {
         event.target.classList.remove('active');
+        event.target.style.display = 'none';
+    }
+});
+
+// Menutup modal saat menekan tombol Escape
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        closeAllModals();
     }
 });
 

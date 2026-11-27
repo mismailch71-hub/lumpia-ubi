@@ -1,15 +1,17 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CourierController;
 use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Courier\CourierDashboardController;
 use App\Http\Controllers\Customer\CustomerOrderController;
 use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 // 1. Landing Page Publik
@@ -53,15 +55,19 @@ Route::get('/dashboard', function () {
 
 // Group Route Khusus Admin
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    
+
     // Admin Dashboard
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-    
+
     // Kelola Pesanan Admin
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/{id}/assign-kurir', [OrderController::class, 'assignKurir'])->name('orders.assign-kurir');
     Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
-    
+
+    // Verifikasi & Tolak Bukti Pembayaran QRIS
+    Route::post('/orders/{id}/verify', [OrderController::class, 'verifyPayment'])->name('orders.verify');
+    Route::post('/orders/{id}/reject', [OrderController::class, 'rejectPayment'])->name('orders.reject');
+
     // CRUD Produk Lumpia Ubi
     Route::resource('products', ProductController::class);
 
@@ -69,13 +75,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/promos', function () {
         return view('admin.promos.index');
     })->name('promos.index');
-    Route::post('/promos', function (\Illuminate\Http\Request $request) {
+    Route::post('/promos', function (Request $request) {
         return back()->with('success', 'Pengaturan promo berhasil diperbarui.');
     })->name('promos.store');
 
     // Menu Ulasan & Rating
     Route::get('/reviews', function () {
-        $orders = \Illuminate\Support\Facades\DB::table('orders')
+        $orders = DB::table('orders')
             ->orderByDesc('id')
             ->get();
 
@@ -93,17 +99,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Laporan Penjualan
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-
-    // Verifikasi & Tolak Bukti Pembayaran QRIS
-    Route::post('/orders/{id}/verify', [AdminOrderController::class, 'verifyPayment'])->name('orders.verify');
-    Route::post('/orders/{id}/reject', [AdminOrderController::class, 'rejectPayment'])->name('orders.reject');
 });
 
+// Group Route Khusus Kurir
 Route::middleware(['auth', 'role:kurir'])->prefix('courier')->name('courier.')->group(function () {
     Route::get('/dashboard', [CourierDashboardController::class, 'index'])->name('dashboard');
     Route::get('/history', [CourierDashboardController::class, 'history'])->name('history');
     Route::get('/profile', [CourierDashboardController::class, 'profile'])->name('profile');
-    Route::put('/profile/update', [CourierDashboardController::class, 'updateProfile'])->name('profile.update'); // 👈 Rute Baru
+    Route::put('/profile/update', [CourierDashboardController::class, 'updateProfile'])->name('profile.update');
     Route::post('/orders/{id}/update-status', [CourierDashboardController::class, 'updateStatus'])->name('orders.update-status');
 });
 

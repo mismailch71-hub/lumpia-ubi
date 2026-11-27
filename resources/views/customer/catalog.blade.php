@@ -74,6 +74,17 @@
             </div>
         @endif
 
+        @if($errors->any())
+            <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 14px; border-radius: 10px; margin-bottom: 16px; font-size: 13px;">
+                <strong>Pesanan belum tersimpan:</strong>
+                <ul style="margin: 6px 0 0 0; padding-left: 18px;">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="product-grid">
             @forelse($products as $product)
                 @php

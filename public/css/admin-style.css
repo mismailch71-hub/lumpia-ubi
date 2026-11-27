@@ -658,3 +658,88 @@ body.admin-body {
     text-align: right;
     margin-top: 16px;
 }
+
+/* Modal rincian pesanan admin agar bisa di-scroll dan rapi */
+.modal-box {
+    max-height: 90vh;
+    overflow-y: auto;
+    width: 100%;
+    max-width: 580px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: -20px;
+    background: #ffffff;
+    z-index: 2;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 17px;
+    color: #1e293b;
+}
+
+.btn-close-modal {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-close-modal:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.modal-body {
+    font-size: 13.5px;
+    color: #334155;
+    line-height: 1.55;
+}
+
+.item-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    margin-bottom: 14px;
+    font-size: 13px;
+}
+
+.item-list-table th,
+.item-list-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.item-list-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+}
+
+.item-list-table td:last-child,
+.item-list-table th:last-child {
+    text-align: right;
+}

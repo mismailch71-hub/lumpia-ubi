@@ -163,43 +163,83 @@ function haversineKm(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
+async function reverseGeocodeCoords(lat, lng) {
+    try {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&accept-language=id`;
+        const response = await fetch(url, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        if (!response.ok) return null;
+
+        const data = await response.json();
+        if (data && data.display_name) {
+            return data.display_name;
+        }
+        return null;
+    } catch (err) {
+        return null;
+    }
+}
+
 function detectCurrentLocation() {
     const statusText = document.getElementById('locationStatusText');
     const addressInput = document.getElementById('shippingAddressInput');
+
     if (!navigator.geolocation) {
-        if (statusText) statusText.textContent = 'Browser tidak mendukung GPS lokasi saat ini. Silakan tulis alamat manual.';
+        if (statusText) {
+            statusText.textContent = 'Browser tidak mendukung GPS lokasi saat ini. Silakan tulis alamat manual.';
+        }
         return;
     }
 
-    if (statusText) statusText.textContent = 'Mendeteksi lokasi saat ini...';
+    if (statusText) {
+        statusText.textContent = 'Mendeteksi lokasi & mengambil nama alamat dari peta...';
+    }
+
     navigator.geolocation.getCurrentPosition(
-        (pos) => {
+        async (pos) => {
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
             const latInput = document.getElementById('latInput');
             const lngInput = document.getElementById('lngInput');
+
             if (latInput) latInput.value = lat;
             if (lngInput) lngInput.value = lng;
 
             const dist = haversineKm(UNRAM_LAT, UNRAM_LNG, lat, lng);
             calculatedDistanceKm = dist <= UNRAM_FREE_RADIUS_KM ? 0 : Number(dist.toFixed(1));
 
-            if (addressInput && !addressInput.value.trim()) {
-                addressInput.value = calculatedDistanceKm === 0
-                    ? 'Area Kampus Universitas Mataram (Lokasi Saat Ini)'
-                    : `Lokasi Saat Ini (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+            const readableAddress = await reverseGeocodeCoords(lat, lng);
+
+            if (addressInput) {
+                if (calculatedDistanceKm === 0) {
+                    addressInput.value = readableAddress
+                        ? `${readableAddress} (Area Kampus Unram)`
+                        : 'Area Kampus Universitas Mataram (Lokasi Saat Ini)';
+                } else {
+                    addressInput.value = readableAddress || `Lokasi Saat Ini (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+                }
             }
 
             if (statusText) {
                 statusText.textContent = calculatedDistanceKm === 0
-                    ? 'Terdeteksi di area Kampus Unram -> Ongkir Rp 0'
-                    : `Terdeteksi ~${calculatedDistanceKm} km dari Kampus Unram -> Ongkir ${formatRupiah(Math.ceil(calculatedDistanceKm) * 1000)}`;
+                    ? 'Terdeteksi di area Kampus Unram -> Ongkir Rp 0 & alamat terisi otomatis.'
+                    : `Terdeteksi ~${calculatedDistanceKm} km dari Kampus Unram -> Ongkir ${formatRupiah(Math.ceil(calculatedDistanceKm) * 1000)} & alamat terisi otomatis.`;
             }
 
             calculateTotal();
         },
         () => {
-            if (statusText) statusText.textContent = 'Izin lokasi ditolak/tidak aktif. Anda tetap bisa mengisi alamat pengiriman secara manual.';
+            if (statusText) {
+                statusText.textContent = 'Izin lokasi ditolak/tidak aktif. Anda tetap bisa mengisi alamat pengiriman secara manual.';
+            }
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
         }
     );
 }
