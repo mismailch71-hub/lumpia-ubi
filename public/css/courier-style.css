@@ -162,7 +162,7 @@
 }
 
 /* ==========================================
-   STYLE HALAMAN PROFIL KURIR
+   STYLE HALAMAN PROFIL KURIR & EDIT FORM
    ========================================== */
 .profile-grid {
     display: grid;
@@ -184,37 +184,6 @@
     text-align: center;
 }
 
-.avatar-circle {
-    width: 80px;
-    height: 80px;
-    background: #6b21a8;
-    color: #ffffff;
-    font-size: 32px;
-    font-weight: bold;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 15px auto;
-}
-
-.profile-name {
-    margin: 0;
-    color: #1e293b;
-}
-
-.profile-email {
-    color: #64748b;
-    font-size: 14px;
-    margin-top: 4px;
-}
-
-.profile-divider {
-    border: none;
-    border-top: 1px dashed #e2e8f0;
-    margin: 16px 0;
-}
-
 .profile-details {
     text-align: left;
     font-size: 13px;
@@ -225,65 +194,6 @@
     margin-top: 8px;
 }
 
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-group label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 6px;
-    font-size: 14px;
-    color: #334155;
-}
-
-.form-control {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 14px;
-    box-sizing: border-box;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: #6b21a8;
-}
-
-.form-control-disabled {
-    background: #f1f5f9;
-    cursor: not-allowed;
-}
-
-.alert-danger-custom {
-    background: #fef2f2;
-    border: 1px solid #fca5a5;
-    color: #991b1b;
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
-.section-title-sub {
-    margin-bottom: 12px;
-    color: #1e293b;
-}
-
-.section-desc-sub {
-    font-size: 12px;
-    color: #64748b;
-    margin-bottom: 14px;
-}
-
-.btn-profile-submit {
-    padding: 10px 20px;
-    font-size: 14px;
-}
-
-/* ==========================================
-   STYLE HALAMAN PROFIL KURIR & EDIT FORM
-   ========================================== */
 .profile-header-box {
     display: flex;
     justify-content: space-between;
@@ -333,7 +243,7 @@
     border-radius: 12px;
     padding: 30px;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .avatar-circle {
@@ -347,6 +257,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 auto 15px auto;
 }
 
 .profile-name {
@@ -356,12 +267,14 @@
 
 .profile-email {
     color: #64748b;
+    font-size: 14px;
     margin-top: 4px;
 }
 
 .profile-divider {
     border: none;
     border-top: 1px dashed #e2e8f0;
+    margin: 16px 0;
 }
 
 .profile-info-grid {
@@ -454,4 +367,319 @@
 .btn-profile-submit {
     padding: 10px 20px;
     font-size: 14px;
+}
+
+/* ==========================================
+   TEMA DASHBOARD KURIR - GAYA CHAT TANPA IKON
+   ========================================== */
+.courier-section-title {
+    margin-bottom: 16px;
+}
+
+.courier-chat-board {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.courier-chat-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.courier-chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    background-color: #581c87;
+    color: #ffffff;
+}
+
+.courier-chat-order-id {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.courier-chat-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.courier-chat-thread {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 360px;
+    overflow-y: auto;
+    background-color: #efeae2;
+    background-image:
+        radial-gradient(rgba(107, 33, 168, 0.07) 1px, transparent 1px),
+        radial-gradient(rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: 0 0, 12px 12px;
+}
+
+.chat-bubble {
+    max-width: min(82%, 620px);
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    word-break: break-word;
+}
+
+.chat-bubble-incoming {
+    align-self: flex-start;
+    background-color: #ffffff;
+    color: #1e293b;
+    border-top-left-radius: 4px;
+}
+
+.chat-bubble-outgoing {
+    align-self: flex-end;
+    background-color: #f3e8ff;
+    color: #2e1065;
+    border: 1px solid #d8b4fe;
+    border-top-right-radius: 4px;
+}
+
+.chat-bubble-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6b21a8;
+    margin-bottom: 3px;
+}
+
+.chat-bubble-contact {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #475569;
+}
+
+.chat-bubble-items {
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+.chat-bubble-items li {
+    margin-bottom: 2px;
+}
+
+.chat-bubble-footer {
+    margin-top: 6px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    font-size: 10.5px;
+    color: #64748b;
+}
+
+.chat-reply-bar {
+    display: flex;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    align-items: center;
+}
+
+.chat-reply-input {
+    flex: 1;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    font-size: 12.5px;
+    background-color: #ffffff;
+    color: #1e293b;
+    box-sizing: border-box;
+}
+
+.chat-reply-btn {
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.courier-chat-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    background-color: #ffffff;
+    border-top: 1px solid #e2e8f0;
+}
+
+.courier-left-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.courier-action-btn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+/* Riwayat Pengiriman Kurir (Tanpa Ikon & Tombol Hapus Selesai) */
+.courier-history-stats {
+    margin-bottom: 20px;
+}
+
+.courier-history-income {
+    color: #059669;
+}
+
+.courier-history-time {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.courier-history-total {
+    margin-top: 8px;
+}
+
+.courier-history-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.courier-no-phone {
+    font-size: 12px;
+}
+
+.courier-btn-delete-history {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.courier-btn-delete-history:hover {
+    background-color: #fecaca;
+    color: #7f1d1d;
+}
+
+/* Halaman Profil Kurir (Foto Avatar & Edit Profil) */
+.courier-profile-title {
+    margin: 0;
+}
+
+.courier-profile-alert {
+    margin-bottom: 20px;
+}
+
+.courier-profile-top {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.courier-avatar-box {
+    margin: 0 !important;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.courier-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.courier-profile-name {
+    font-size: 22px;
+}
+
+.courier-profile-email {
+    font-size: 15px;
+}
+
+.courier-profile-divider {
+    margin: 24px 0;
+}
+
+.courier-status-active {
+    color: #059669;
+    font-weight: 700;
+}
+
+.courier-edit-card {
+    display: none;
+    margin-top: 0;
+}
+
+.courier-edit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.courier-edit-header h3 {
+    margin: 0;
+}
+
+.courier-edit-divider {
+    margin: 20px 0;
+}
+
+.courier-edit-actions {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.courier-avatar-box {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    flex-shrink: 0;
+}
+
+.courier-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Pesanan Saya - Lumpia Ubi</title>
     <link rel="stylesheet" href="{{ asset('css/admin-style.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/courier-style.css') }}?v={{ time() }}">
@@ -15,7 +16,11 @@
     @endphp
 
     <div class="mobile-top-header">
-        <span>Lumpia Ubi Store</span>
+        <img src="{{ asset('images/logo-lumbi.jpeg') }}"
+                     onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
+                     alt="Logo Lumbi Uwuu"
+                     class="admin-brand-logo">
+                <span class="admin-brand-text">Lumbi Uwuu Store</span>
     </div>
 
     <aside class="sidebar">
@@ -69,6 +74,10 @@
 
         <div class="section-box">
             @forelse($orders as $order)
+                @php
+                    $orderTimeLabel = !empty($order->created_at) ? \Carbon\Carbon::parse($order->created_at)->format('H:i') : date('H:i');
+                    $courierLabel = $order->courier_name ?? 'Kurir Lumbi Uwuu';
+                @endphp
                 <div class="customer-order-card">
                     <div class="delivery-card-header">
                         <div>
@@ -117,23 +126,30 @@
                             <strong>Total Pembayaran:</strong> <strong class="text-price">Rp {{ number_format($order->total_price, 0, ',', '.') }}</strong>
                         </p>
 
-                        <div class="chat-box-panel">
-                            <div class="chat-box-title">
-                                Chat Kurir ({{ $order->courier_name ?? 'Kurir Lumbi Uwuu' }}) — Langsung di Web
+                        <div class="customer-chat-panel">
+                            <div class="customer-chat-topbar">
+                                Chat Kurir ({{ $courierLabel }}) &mdash; #ORD-{{ $order->id }}
                             </div>
-                            <div id="chatMessages-{{ $order->id }}" class="chat-messages-area">
-                                <div class="chat-msg-item">
-                                    <strong>Kurir:</strong> Halo kak, pesanan #ORD-{{ $order->id }} siap diantar. Silakan chat di sini jika ada patokan lokasi.
+                            <div id="chatMessages-{{ $order->id }}"
+                                 class="customer-chat-thread"
+                                 data-order-id="{{ $order->id }}">
+                                <div class="chat-bubble chat-bubble-incoming">
+                                    <div class="chat-bubble-label">{{ $courierLabel }}</div>
+                                    <div>Halo kak, pesanan #ORD-{{ $order->id }} sedang diproses/diantar. Silakan tulis di sini jika ada patokan lokasi.</div>
+                                    <div class="chat-bubble-footer">
+                                        <span>{{ $orderTimeLabel }}</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="chat-input-row">
-                                <input type="text" id="chatInput-{{ $order->id }}" class="form-control chat-input-field"
+                            <form class="customer-chat-form" onsubmit="event.preventDefault(); sendCourierChat('{{ $order->id }}');">
+                                <input type="text"
+                                       id="chatInput-{{ $order->id }}"
+                                       class="customer-chat-input"
                                        placeholder="Tulis pesan untuk kurir...">
-                                <button type="button" class="btn-submit-small btn-online chat-send-btn"
-                                        onclick="sendCourierChat('{{ $order->id }}')">
+                                <button type="submit" class="btn-submit-small btn-online customer-chat-send">
                                     Kirim
                                 </button>
-                            </div>
+                            </form>
                         </div>
 
                         <div class="rating-box-row">

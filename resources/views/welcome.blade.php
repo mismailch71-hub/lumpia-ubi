@@ -28,8 +28,8 @@
                 <img src="{{ asset('images/logo-lumbi.jpeg') }}"
                      onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
                      alt="Logo Lumbi Uwuu"
-                     style="height: 30px; width: auto; object-fit: contain;">
-                <span>Lumbi Uwuu Store</span>
+                     class="admin-brand-logo">
+                <span class="admin-brand-text">Lumpia Ubi Store</span>
             </div>
             <ul class="sidebar-menu">
                 <li><a href="{{ url('/') }}" class="active">Beranda</a></li>

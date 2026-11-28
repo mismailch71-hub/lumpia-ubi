@@ -12,22 +12,29 @@
     <!-- SIDEBAR NAVIGASI TUNGGAL -->
     <aside class="sidebar">
         <div>
-            <div class="sidebar-brand">
-                Lumpia Ubi Admin
+            <div class="sidebar-brand admin-brand-box">
+                <img src="{{ asset('images/logo-lumbi.jpeg') }}"
+                     onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
+                     alt="Logo Lumbi Uwuu"
+                     class="admin-brand-logo">
+                <span class="admin-brand-text">Admin Lumbi Uwuu</span>
             </div>
             <ul class="sidebar-menu">
                 <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a></li>
                 <li><a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">Kelola Pesanan</a></li>
                 <li><a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Kelola Produk</a></li>
+                <li><a href="{{ route('admin.expenses.index') }}" class="{{ request()->routeIs('admin.expenses.*') ? 'active' : '' }}">Pengeluaran</a></li>
+                <li><a href="{{ route('admin.promos.index') }}" class="{{ request()->routeIs('admin.promos.*') ? 'active' : '' }}">Promo</a></li>
+                <li><a href="{{ route('admin.reviews.index') }}" class="{{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">Ulasan &amp; Rating</a></li>
                 <li><a href="{{ route('admin.couriers.index') }}" class="{{ request()->routeIs('admin.couriers.*') ? 'active' : '' }}">Daftar Kurir</a></li>
                 <li><a href="{{ route('admin.customers.index') }}" class="{{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">Data Customer</a></li>
-                <li><a href="#" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">Laporan</a></li>
+                <li><a href="{{ route('admin.reports.index') }}" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">Laporan</a></li>
             </ul>
         </div>
 
         <form action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="submit" class="btn-logout">Keluar / Logout</button>
+            <button type="submit" class="btn-logout">Logout</button>
         </form>
     </aside>
 
@@ -52,13 +59,17 @@
 
         <div class="section-box">
             <!-- BARIS FILTER & CARI -->
-            <div class="filter-bar">
-                <h3 style="margin: 0;">Daftar Seluruh Pesanan Masuk</h3>
-                
-                <form action="{{ route('admin.orders.index') }}" method="GET" class="filter-group">
-                    <input type="text" name="search" class="input-search" placeholder="Cari customer / ID..." value="{{ request('search') }}">
-                    
-                    <select name="status" class="form-select" onchange="this.form.submit()">
+            <div class="orders-filter-bar">
+                <h3 class="orders-filter-title">Daftar Seluruh Pesanan Masuk</h3>
+
+                <form action="{{ route('admin.orders.index') }}" method="GET" class="orders-filter-form">
+                    <input type="text"
+                            name="search"
+                            class="orders-search-input"
+                            placeholder="Cari customer / ID..."
+                            value="{{ request('search') }}">
+
+                    <select name="status" class="orders-status-select" onchange="this.form.submit()">
                         <option value="">-- Semua Status --</option>
                         <option value="menunggu_verifikasi" {{ request('status') == 'menunggu_verifikasi' ? 'selected' : '' }}>Menunggu Verifikasi QRIS</option>
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
@@ -69,10 +80,10 @@
                         <option value="dibatalkan" {{ request('status') == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
                     </select>
 
-                    <button type="submit" class="btn-submit-small">Cari</button>
+                    <button type="submit" class="btn-submit-small orders-search-btn">Cari</button>
 
                     @if(request('status') || request('search'))
-                        <a href="{{ route('admin.orders.index') }}" class="btn-secondary" style="padding: 6px 12px; font-size: 11px;">Reset</a>
+                        <a href="{{ route('admin.orders.index') }}" class="btn-secondary orders-reset-btn">Reset</a>
                     @endif
                 </form>
             </div>

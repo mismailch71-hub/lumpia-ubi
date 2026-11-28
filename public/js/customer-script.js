@@ -6,11 +6,28 @@ let currentPriceMedium = 0;
 let currentPriceLarge = 0;
 let cart = [];
 let calculatedDistanceKm = 0;
+let addressGeocodeTimer = null;
 
 // Koordinat Kampus Pusat Universitas Mataram (Jl. Majapahit No. 62, Gomong, Selaparang)
 const UNRAM_LAT = -8.58819;
 const UNRAM_LNG = 116.09288;
 const UNRAM_FREE_RADIUS_KM = 0.8; // Area Unram = Rp 0, di luar itu Rp 1.000 / km
+
+// Perkiraan jarak fallback (km) dari Kampus Unram untuk area sekitar Mataram & Lombok Barat
+const AREA_DISTANCE_HINTS = [
+    { keyword: 'midang', km: 7.5 },
+    { keyword: 'gunungsari', km: 8.5 },
+    { keyword: 'gomong', km: 0.6 },
+    { keyword: 'dasan agung', km: 1.5 },
+    { keyword: 'sek arbela', km: 1.8 },
+    { keyword: 'sekarbela', km: 1.8 },
+    { keyword: 'ampenan', km: 4.5 },
+    { keyword: 'cakranegara', km: 4.0 },
+    { keyword: 'mataram', km: 2.5 },
+    { keyword: 'senggigi', km: 14.0 },
+    { keyword: 'narmada', km: 10.5 },
+    { keyword: 'gerung', km: 22.0 },
+];
 
 function formatRupiah(num) {
     return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
@@ -163,6 +180,23 @@ function haversineKm(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
+function guessDistanceFromText(addressText) {
+    const lower = (addressText || '').toLowerCase();
+    if (!lower.trim()) return null;
+
+    if (lower.includes('unram') || lower.includes('universitas mataram')) {
+        return 0;
+    }
+
+    for (const item of AREA_DISTANCE_HINTS) {
+        if (lower.includes(item.keyword)) {
+            return item.km;
+        }
+    }
+
+    return null;
+}
+
 async function reverseGeocodeCoords(lat, lng) {
     try {
         const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&accept-language=id`;
@@ -174,13 +208,90 @@ async function reverseGeocodeCoords(lat, lng) {
         if (!response.ok) return null;
 
         const data = await response.json();
-        if (data && data.display_name) {
-            return data.display_name;
-        }
-        return null;
+        return data && data.display_name ? data.display_name : null;
     } catch (err) {
         return null;
     }
+}
+
+async function calculateDistanceFromAddressText(addressText) {
+    const query = (addressText || '').trim();
+    const statusText = document.getElementById('locationStatusText');
+    const latInput = document.getElementById('latInput');
+    const lngInput = document.getElementById('lngInput');
+
+    if (!query) {
+        calculatedDistanceKm = 0;
+        if (latInput) latInput.value = '';
+        if (lngInput) lngInput.value = '';
+        if (statusText) {
+            statusText.textContent = 'Masukkan alamat tujuan atau gunakan lokasi saat ini untuk menghitung jarak dari Unram.';
+        }
+        calculateTotal();
+        return;
+    }
+
+    if (statusText) {
+        statusText.textContent = 'Menghitung jarak dari Kampus Unram berdasarkan alamat...';
+    }
+
+    try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=id&q=${encodeURIComponent(query)}`;
+        const response = await fetch(url, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const results = await response.json();
+            if (Array.isArray(results) && results.length > 0) {
+                const targetLat = parseFloat(results[0].lat);
+                const targetLng = parseFloat(results[0].lon);
+
+                if (latInput) latInput.value = targetLat;
+                if (lngInput) lngInput.value = targetLng;
+
+                const rawDist = haversineKm(UNRAM_LAT, UNRAM_LNG, targetLat, targetLng);
+                const roadFactorDist = rawDist <= UNRAM_FREE_RADIUS_KM ? 0 : Number((rawDist * 1.25).toFixed(1));
+                calculatedDistanceKm = roadFactorDist;
+
+                const fee = calculatedDistanceKm <= 0 ? 0 : Math.ceil(calculatedDistanceKm) * 1000;
+                if (statusText) {
+                    statusText.textContent = calculatedDistanceKm === 0
+                        ? 'Terdeteksi di area Kampus Unram -> Ongkir Rp 0.'
+                        : `Jarak ~${calculatedDistanceKm.toFixed(1).replace('.', ',')} km dari Kampus Unram -> Ongkir ${formatRupiah(fee)}.`;
+                }
+
+                calculateTotal();
+                return;
+            }
+        }
+    } catch (err) {
+        // Lanjut ke fallback teks wilayah di bawah
+    }
+
+    const fallbackKm = guessDistanceFromText(query);
+    if (fallbackKm !== null) {
+        calculatedDistanceKm = fallbackKm <= UNRAM_FREE_RADIUS_KM ? 0 : fallbackKm;
+        const fee = calculatedDistanceKm <= 0 ? 0 : Math.ceil(calculatedDistanceKm) * 1000;
+        if (statusText) {
+            statusText.textContent = calculatedDistanceKm === 0
+                ? 'Terdeteksi di area Kampus Unram -> Ongkir Rp 0.'
+                : `Perkiraan jarak ~${calculatedDistanceKm.toFixed(1).replace('.', ',')} km dari Kampus Unram -> Ongkir ${formatRupiah(fee)}.`;
+        }
+        calculateTotal();
+    }
+}
+
+function handleAddressInputChange() {
+    const addressInput = document.getElementById('shippingAddressInput');
+    if (!addressInput) return;
+
+    clearTimeout(addressGeocodeTimer);
+    addressGeocodeTimer = setTimeout(() => {
+        calculateDistanceFromAddressText(addressInput.value);
+    }, 500);
 }
 
 function detectCurrentLocation() {
@@ -209,7 +320,7 @@ function detectCurrentLocation() {
             if (lngInput) lngInput.value = lng;
 
             const dist = haversineKm(UNRAM_LAT, UNRAM_LNG, lat, lng);
-            calculatedDistanceKm = dist <= UNRAM_FREE_RADIUS_KM ? 0 : Number(dist.toFixed(1));
+            calculatedDistanceKm = dist <= UNRAM_FREE_RADIUS_KM ? 0 : Number((dist * 1.25).toFixed(1));
 
             const readableAddress = await reverseGeocodeCoords(lat, lng);
 
@@ -226,7 +337,7 @@ function detectCurrentLocation() {
             if (statusText) {
                 statusText.textContent = calculatedDistanceKm === 0
                     ? 'Terdeteksi di area Kampus Unram -> Ongkir Rp 0 & alamat terisi otomatis.'
-                    : `Terdeteksi ~${calculatedDistanceKm} km dari Kampus Unram -> Ongkir ${formatRupiah(Math.ceil(calculatedDistanceKm) * 1000)} & alamat terisi otomatis.`;
+                    : `Terdeteksi ~${calculatedDistanceKm.toFixed(1).replace('.', ',')} km dari Kampus Unram -> Ongkir ${formatRupiah(Math.ceil(calculatedDistanceKm) * 1000)} & alamat terisi otomatis.`;
             }
 
             calculateTotal();
@@ -303,7 +414,76 @@ function prepareCartSubmission() {
     return true;
 }
 
-function sendCourierChat(orderId) {
+function getCsrfTokenCustomer() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta) return meta.getAttribute('content');
+    const input = document.querySelector('input[name="_token"]');
+    return input ? input.value : '';
+}
+
+function appendCustomerBubble(container, senderName, messageText, timeText, isOutgoing, isSynced = true) {
+    if (!container) return;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble ' + (isSynced ? 'chat-bubble-synced ' : '') + (isOutgoing ? 'chat-bubble-outgoing' : 'chat-bubble-incoming');
+
+    const label = document.createElement('div');
+    label.className = 'chat-bubble-label';
+    label.textContent = senderName;
+
+    const body = document.createElement('div');
+    body.textContent = messageText;
+
+    const footer = document.createElement('div');
+    footer.className = 'chat-bubble-footer';
+
+    const timeSpan = document.createElement('span');
+    timeSpan.textContent = timeText;
+
+    footer.appendChild(timeSpan);
+    bubble.appendChild(label);
+    bubble.appendChild(body);
+    bubble.appendChild(footer);
+
+    container.appendChild(bubble);
+    container.scrollTop = container.scrollHeight;
+}
+
+async function loadCustomerOrderChat(orderId) {
+    const area = document.getElementById('chatMessages-' + orderId);
+    if (!area || !orderId) return;
+
+    try {
+        const res = await fetch(`/orders/${encodeURIComponent(orderId)}/chat`, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (!Array.isArray(data.messages)) return;
+
+        area.querySelectorAll('.chat-bubble-synced').forEach(el => el.remove());
+
+        data.messages.forEach(function (msg) {
+            const isOutgoing = msg.sender_role === 'customer';
+            appendCustomerBubble(
+                area,
+                msg.sender_name || (isOutgoing ? 'Anda (Customer)' : 'Kurir'),
+                msg.message || '',
+                msg.time || '',
+                isOutgoing,
+                true
+            );
+        });
+    } catch (e) {
+        // Abaikan error jaringan sementara
+    }
+}
+
+async function sendCourierChat(orderId) {
     const input = document.getElementById('chatInput-' + orderId);
     const area = document.getElementById('chatMessages-' + orderId);
     if (!input || !area) return;
@@ -311,9 +491,30 @@ function sendCourierChat(orderId) {
     const text = input.value.trim();
     if (!text) return;
 
-    const safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    area.innerHTML += `<div class="chat-msg-item" style="background:#eef2ff;color:#1e293b;"><strong>Anda:</strong> ${safeText}</div>`;
-    area.scrollTop = area.scrollHeight;
+    const now = new Date();
+    const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+    try {
+        const res = await fetch(`/orders/${encodeURIComponent(orderId)}/chat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': getCsrfTokenCustomer()
+            },
+            body: JSON.stringify({ message: text })
+        });
+        if (res.ok) {
+            input.value = '';
+            await loadCustomerOrderChat(orderId);
+            return;
+        }
+    } catch (e) {
+        // Fallback jika gagal request
+    }
+
+    appendCustomerBubble(area, 'Anda (Customer)', text, timeStr, true, false);
     input.value = '';
 }
 
@@ -346,19 +547,6 @@ function closeProfileModal() {
     if (modal) modal.style.display = 'none';
 }
 
-/**
- * Toggle Posisi Navigasi (Sidebar Kiri <-> Navigasi Bawah)
- */
-document.addEventListener('DOMContentLoaded', function () {
-    const savedLayout = localStorage.getItem('customer_nav_layout');
-    if (savedLayout === 'bottom') {
-        document.body.classList.add('layout-bottom');
-        updateToggleButtonText(true);
-    } else {
-        updateToggleButtonText(false);
-    }
-});
-
 function toggleSidebarPosition() {
     const isBottom = document.body.classList.toggle('layout-bottom');
     localStorage.setItem('customer_nav_layout', isBottom ? 'bottom' : 'left');
@@ -373,3 +561,58 @@ function updateToggleButtonText(isBottom) {
             : 'Pindah Menu ke Bawah';
     }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const bodyEl = document.body;
+    if (bodyEl && bodyEl.dataset.defaultImg) {
+        window.LUMPIA_DEFAULT_IMG = bodyEl.dataset.defaultImg;
+    }
+
+    const savedLayout = localStorage.getItem('customer_nav_layout');
+    if (savedLayout === 'bottom') {
+        document.body.classList.add('layout-bottom');
+        updateToggleButtonText(true);
+    } else {
+        updateToggleButtonText(false);
+    }
+
+    const addressInput = document.getElementById('shippingAddressInput');
+    if (addressInput) {
+        addressInput.addEventListener('input', handleAddressInputChange);
+        addressInput.addEventListener('change', function () {
+            calculateDistanceFromAddressText(addressInput.value);
+        });
+        if (addressInput.value.trim()) {
+            calculateDistanceFromAddressText(addressInput.value);
+        }
+    }
+
+    document.querySelectorAll('.customer-chat-thread[data-order-id]').forEach(function (thread) {
+        const orderId = thread.getAttribute('data-order-id');
+        if (!orderId) return;
+        loadCustomerOrderChat(orderId);
+        setInterval(function () {
+            loadCustomerOrderChat(orderId);
+        }, 4000);
+    });
+});
+
+window.toggleCustomerEditForm = function () {
+    const viewCard = document.getElementById('profileViewCard');
+    const editCard = document.getElementById('profileEditCard');
+    const btnToggle = document.getElementById('btnToggleEdit');
+    if (!viewCard || !editCard) return;
+
+    const isHidden = editCard.style.display === 'none' || window.getComputedStyle(editCard).display === 'none';
+    editCard.style.display = isHidden ? 'block' : 'none';
+    viewCard.style.display = isHidden ? 'none' : 'block';
+    if (btnToggle) {
+        btnToggle.style.display = isHidden ? 'none' : 'inline-flex';
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    if (document.body && document.body.dataset.hasErrors === '1') {
+        window.toggleCustomerEditForm();
+    }
+});

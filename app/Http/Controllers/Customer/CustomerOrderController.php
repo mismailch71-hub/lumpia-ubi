@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class CustomerOrderController extends Controller
 {
@@ -51,6 +55,73 @@ class CustomerOrderController extends Controller
         }
 
         return view('customer.orders', compact('orders'));
+    }
+
+    /**
+     * Perbarui data profil, foto avatar, alamat, dan password customer
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'name'             => ['required', 'string', 'max:255'],
+            'email'            => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone'            => ['nullable', 'string', 'max:30'],
+            'address'          => ['nullable', 'string', 'max:1000'],
+            'avatar'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'current_password' => ['nullable', 'string'],
+            'password'         => ['nullable', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        $updateData = [
+            'name'       => $validated['name'],
+            'email'      => $validated['email'],
+            'updated_at' => now(),
+        ];
+
+        $phoneInput = $validated['phone'] ?? null;
+        if (Schema::hasColumn('users', 'phone')) {
+            $updateData['phone'] = $phoneInput;
+        }
+        if (Schema::hasColumn('users', 'no_hp')) {
+            $updateData['no_hp'] = $phoneInput;
+        }
+        if (Schema::hasColumn('users', 'whatsapp')) {
+            $updateData['whatsapp'] = $phoneInput;
+        }
+
+        $addressInput = $validated['address'] ?? null;
+        if (Schema::hasColumn('users', 'alamat')) {
+            $updateData['alamat'] = $addressInput;
+        }
+        if (Schema::hasColumn('users', 'address')) {
+            $updateData['address'] = $addressInput;
+        }
+
+        if ($request->hasFile('avatar') && $request->file('avatar')->isValid() && Schema::hasColumn('users', 'avatar')) {
+            $currentAvatar = $user->avatar ?? null;
+            if (!empty($currentAvatar) && Storage::disk('public')->exists($currentAvatar)) {
+                Storage::disk('public')->delete($currentAvatar);
+            }
+            $updateData['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        if ($request->filled('password')) {
+            if (empty($validated['current_password']) || !Hash::check($validated['current_password'], $user->password)) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['current_password' => 'Password saat ini tidak sesuai.']);
+            }
+            $updateData['password'] = Hash::make($validated['password']);
+        }
+
+        DB::table('users')
+            ->where('id', $user->id)
+            ->update($updateData);
+
+        return redirect()->route('customer.profile')
+            ->with('success', 'Profil akun berhasil diperbarui!');
     }
 
     /**

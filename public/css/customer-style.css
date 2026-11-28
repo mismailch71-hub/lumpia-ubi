@@ -7,7 +7,7 @@
     padding: 20px;
     margin-bottom: 20px;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .courier-info-box {
@@ -137,16 +137,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
     z-index: 999;
 }
 
 .modal-content {
     background: #ffffff;
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 24px;
     width: 100%;
-    max-width: 480px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    max-width: 640px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
 }
 
 .modal-header {
@@ -154,14 +159,30 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
+    gap: 12px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #1e293b;
 }
 
 .btn-close-modal {
-    background: none;
+    background: #f1f5f9;
     border: none;
-    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
     cursor: pointer;
-    color: #64748b;
+    color: #475569;
+    flex-shrink: 0;
+}
+
+.btn-close-modal:hover {
+    background: #e2e8f0;
+    color: #0f172a;
 }
 
 .modal-product-summary {
@@ -180,6 +201,7 @@
     height: 65px;
     border-radius: 6px;
     object-fit: cover;
+    flex-shrink: 0;
 }
 
 .modal-product-detail h4 {
@@ -197,17 +219,19 @@
 .order-summary-box {
     background: #fcf7ff;
     border: 1px solid #e9d5ff;
-    border-radius: 8px;
-    padding: 12px 16px;
+    border-radius: 10px;
+    padding: 14px 16px;
     margin: 16px 0;
 }
 
 .summary-row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    gap: 12px;
     font-size: 13px;
     color: #475569;
-    margin-bottom: 6px;
+    margin-bottom: 7px;
 }
 
 .summary-row.total {
@@ -380,16 +404,28 @@ body.layout-bottom .main-content {
 .cart-picker-box {
     background: #faf5ff;
     border: 1px solid #e9d5ff;
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: 10px;
+    padding: 14px;
     margin-bottom: 14px;
 }
 
 .cart-picker-grid {
     display: grid;
-    grid-template-columns: 1.4fr 1fr 0.7fr auto;
+    grid-template-columns: minmax(140px, 1.4fr) minmax(105px, 1fr) 74px auto;
     gap: 8px;
     align-items: end;
+}
+
+.cart-picker-grid > * {
+    min-width: 0;
+}
+
+.cart-picker-grid select,
+.cart-picker-grid input,
+.cart-picker-grid button {
+    width: 100%;
+    height: 38px;
+    box-sizing: border-box;
 }
 
 .cart-item-row {
@@ -397,7 +433,7 @@ body.layout-bottom .main-content {
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    padding: 10px;
+    padding: 10px 12px;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     margin-bottom: 8px;
@@ -412,8 +448,8 @@ body.layout-bottom .main-content {
 }
 
 .qty-btn {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     border-radius: 6px;
     border: 1px solid #cbd5e1;
     background: #ffffff;
@@ -622,8 +658,8 @@ body.layout-bottom .main-content {
     }
 
     .modal-content {
-        width: 92% !important;
-        max-height: 85vh;
+        width: 95% !important;
+        max-height: 88vh;
         overflow-y: auto;
         padding: 16px !important;
     }
@@ -723,6 +759,7 @@ body.layout-bottom .main-content {
 
 .btn-add-cart-inline {
     height: 38px;
+    white-space: nowrap;
 }
 
 .cart-items-container {
@@ -784,8 +821,11 @@ body.layout-bottom .main-content {
 }
 
 .modal-footer-actions {
-    text-align: right;
-    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
 }
 
 .order-date-text {
@@ -841,4 +881,178 @@ body.layout-bottom .main-content {
     font-size: 12px;
     color: #166534;
     font-weight: 600;
+}
+
+/* ==========================================
+8. CUSTOM SCROLLBAR TEMA LUMBI UWUU
+   ========================================== */
+html,
+.modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: #7e22ce #f1f5f9;
+}
+
+html::-webkit-scrollbar,
+.modal-content::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+html::-webkit-scrollbar-track,
+.modal-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 999px;
+}
+
+html::-webkit-scrollbar-thumb,
+.modal-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #7e22ce 0%, #581c87 100%);
+    border-radius: 999px;
+    border: 2px solid #f1f5f9;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #6b21a8 0%, #3b0764 100%);
+}
+
+/* Perbaikan tata letak aksi katalog, header & footer modal */
+.customer-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.customer-alert-gap {
+    margin-bottom: 16px;
+}
+
+.customer-error-box {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+
+.customer-error-list {
+    margin: 6px 0 0 0;
+    padding-left: 18px;
+}
+
+.customer-product-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.customer-btn-checkout {
+    background: #3b0764;
+    color: #ffffff;
+}
+
+.customer-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.customer-modal-footer .btn-cancel-edit,
+.customer-modal-footer .btn-submit-small {
+    margin: 0;
+    height: 38px;
+    padding: 0 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+/* Thread Chat Kurir di Halaman Pesanan Customer (Gaya Chat Tanpa WA Eksternal & Tanpa Ikon) */
+.customer-chat-panel {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 14px;
+    background-color: #ffffff;
+}
+
+.customer-chat-topbar {
+    padding: 10px 14px;
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #581c87;
+}
+
+.customer-chat-thread {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 260px;
+    overflow-y: auto;
+    background-color: #efeae2;
+    background-image:
+        radial-gradient(rgba(107, 33, 168, 0.07) 1px, transparent 1px),
+        radial-gradient(rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: 0 0, 12px 12px;
+}
+
+.customer-chat-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 14px;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.customer-chat-input {
+    flex: 1;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    font-size: 12.5px;
+    background-color: #ffffff;
+    color: #1e293b;
+    box-sizing: border-box;
+}
+
+.customer-chat-send {
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Profil Customer Gaya Kartu Ringkasan + Toggle Edit */
+.customer-address-info-box {
+    grid-column: 1 / -1;
+}
+
+.btn-profile-submit {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
 }

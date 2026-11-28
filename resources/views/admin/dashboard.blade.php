@@ -12,21 +12,22 @@
     <aside class="sidebar">
         <div>
             <div class="sidebar-brand admin-brand-box">
-                <img src="{{ asset('images/logo-lumbi.jpeg') }}" 
-                     onerror="if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.jpeg') }}'; } else if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
-                     alt="Logo Lumbi Uwuu" 
+                <img src="{{ asset('images/logo-lumbi.jpeg') }}"
+                     onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
+                     alt="Logo Lumbi Uwuu"
                      class="admin-brand-logo">
-                <span class="admin-brand-text">Lumbi Uwuu</span>
+                <span class="admin-brand-text">Lumbi Uwuu Store</span>
             </div>
             <ul class="sidebar-menu">
                 <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a></li>
                 <li><a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">Kelola Pesanan</a></li>
                 <li><a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Kelola Produk</a></li>
+                <li><a href="{{ route('admin.expenses.index') }}" class="{{ request()->routeIs('admin.expenses.*') ? 'active' : '' }}">Pengeluaran</a></li>
                 <li><a href="{{ route('admin.promos.index') }}" class="{{ request()->routeIs('admin.promos.*') ? 'active' : '' }}">Promo</a></li>
                 <li><a href="{{ route('admin.reviews.index') }}" class="{{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">Ulasan &amp; Rating</a></li>
                 <li><a href="{{ route('admin.couriers.index') }}" class="{{ request()->routeIs('admin.couriers.*') ? 'active' : '' }}">Daftar Kurir</a></li>
                 <li><a href="{{ route('admin.customers.index') }}" class="{{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">Data Customer</a></li>
-                <li><a href="{{ \Illuminate\Support\Facades\Route::has('admin.reports.index') ? route('admin.reports.index') : route('admin.orders.index') }}" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">Laporan</a></li>
+                <li><a href="{{ route('admin.reports.index') }}" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">Laporan</a></li>
             </ul>
         </div>
 
@@ -57,7 +58,7 @@
         <!-- BANNER OPERASIONAL (TOMBOL TETAP KE KELOLA VARIAN & PRODUK) -->
         <div class="admin-promo-card">
             <div>
-                <h3>Ringkasan Operasional — Lumbi Uwuu</h3>
+                <h3>Ringkasan Operasional Lumbi Uwuu</h3>
                 <p>Ongkir Rp 0 area Kampus Unram (-8.58819, 116.09288), luar Unram Rp 1.000/km, +1 Poin tiap 1 produk, dan keranjang Coklat, Keju &amp; Mix.</p>
             </div>
             <a href="{{ route('admin.products.index') }}" class="admin-promo-action">

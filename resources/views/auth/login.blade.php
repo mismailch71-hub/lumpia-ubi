@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk - Lumpia Ubi</title>
-    <link rel="stylesheet" href="{{ asset('css/auth-style.css') }}">
+    <title>Masuk - Lumbi Uwuu Store</title>
+    <link rel="stylesheet" href="{{ asset('css/auth-style.css') }}?v={{ time() }}">
 </head>
 <body class="auth-page">
 
     <div class="auth-card">
         <div class="auth-header">
-            <div class="logo">🍠</div>
-            <h2>Selamat Datang!</h2>
-            <p>Masuk ke akun Lumpia Ubi kamu</p>
+            <img src="{{ asset('images/logo-lumbi.jpeg') }}"
+                 onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
+                 alt="Logo Lumbi Uwuu"
+                 class="auth-brand-logo">
+            <h2>Selamat Datang</h2>
+            <p>Masuk ke akun Lumbi Uwuu kamu</p>
         </div>
 
         @if ($errors->any())
@@ -28,17 +31,16 @@
         <form action="{{ route('login') }}" method="POST">
             @csrf
             <div class="form-group">
-                <label>Email</label>
-                <input type="email" name="email" value="{{ old('email') }}" placeholder="nama@email.com" required autofocus>
+                <label for="login_email">Email</label>
+                <input type="email" id="login_email" name="email" value="{{ old('email') }}" placeholder="nama@email.com" required autofocus>
             </div>
 
             <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" name="password" placeholder="••••••••" required>
-                
-                <!-- CHECKBOX SHOW PASSWORD -->
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Masukkan password" required>
+
                 <div class="show-password-group">
-                    <input type="checkbox" id="show-password" onclick="togglePassword()">
+                    <input type="checkbox" id="show-password">
                     <label for="show-password">Lihat Password</label>
                 </div>
             </div>
@@ -51,16 +53,6 @@
         </div>
     </div>
 
-    <!-- SCRIPT TOGGLE PASSWORD -->
-    <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-            } else {
-                passwordInput.type = 'password';
-            }
-        }
-    </script>
+    <script src="{{ asset('js/auth-script.js') }}?v={{ time() }}"></script>
 </body>
 </html>

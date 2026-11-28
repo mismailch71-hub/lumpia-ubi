@@ -6,6 +6,7 @@
     <title>Riwayat Pengiriman - Lumpia Ubi</title>
     <link rel="stylesheet" href="{{ asset('css/admin-style.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/courier-style.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-style.css') }}?v={{ time() }}">
 </head>
 <body class="admin-body">
 
@@ -13,44 +14,58 @@
     <aside class="sidebar">
         <div>
             <div class="sidebar-brand">
-                <span>🛵</span> Kurir Lumpia Ubi
+                <img src="{{ asset('images/logo-lumbi.jpeg') }}"
+                     onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
+                     alt="Logo Lumbi Uwuu"
+                     class="admin-brand-logo">
+                <span class="admin-brand-text">Kurir Lumpia Uwuu</span>
             </div>
             <ul class="sidebar-menu">
-                <li><a href="{{ route('courier.dashboard') }}">📦 Tugas Pengiriman</a></li>
-                <li><a href="{{ route('courier.history') }}" class="active">📜 Riwayat Pengiriman</a></li>
-                <li><a href="{{ route('courier.profile') }}">👤 Profil Saya</a></li>
+                <li><a href="{{ route('courier.dashboard') }}">Tugas Pengiriman</a></li>
+                <li><a href="{{ route('courier.history') }}" class="active">Riwayat Pengiriman</a></li>
+                <li><a href="{{ route('courier.profile') }}">Profil</a></li>
             </ul>
         </div>
 
         <form action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="submit" class="btn-logout">🚪 Keluar / Logout</button>
+            <button type="submit" class="btn-logout">Logout</button>
         </form>
     </aside>
 
     <!-- KONTEN UTAMA -->
     <main class="main-content">
         <div class="header-title">
-            <h2>📜 Riwayat Pengiriman Selesai</h2>
+            <h2>Riwayat Pengiriman Selesai</h2>
             <p>Daftar pesanan yang telah berhasil Anda antarkan.</p>
         </div>
 
+        @if(session('success'))
+            <div class="alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert-danger-custom">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <!-- REKAPITULASI RINGKASAN -->
-        <div class="stats-grid" style="margin-bottom: 20px;">
+        <div class="stats-grid courier-history-stats">
             <div class="stat-card">
                 <div class="info">
                     <h3>Total Terantar</h3>
                     <p class="text-completed-count">{{ $completedDeliveries->count() }} Pesanan</p>
                 </div>
-                <div class="icon">✅</div>
             </div>
 
             <div class="stat-card">
                 <div class="info">
                     <h3>Total Nilai Antaran</h3>
-                    <p class="text-active-count" style="color: #059669;">Rp {{ number_format($totalIncome, 0, ',', '.') }}</p>
+                    <p class="text-active-count courier-history-income">Rp {{ number_format($totalIncome, 0, ',', '.') }}</p>
                 </div>
-                <div class="icon">💰</div>
             </div>
         </div>
 
@@ -60,19 +75,19 @@
                     <div class="delivery-card-header">
                         <div>
                             <h4>#ORD-{{ $completedOrder->id }}</h4>
-                            <small style="color: #64748b; font-size: 12px;">
-                                🕒 Selesai: {{ \Carbon\Carbon::parse($completedOrder->updated_at)->translatedFormat('d M Y, H:i') }} WITA
+                            <small class="courier-history-time">
+                                Selesai: {{ \Carbon\Carbon::parse($completedOrder->updated_at)->translatedFormat('d M Y, H:i') }} WITA
                             </small>
                         </div>
                         <div>
                             <!-- BADGE METODE PEMBAYARAN -->
                             @if(isset($completedOrder->payment_method) && strtolower($completedOrder->payment_method) == 'cod')
-                                <span class="payment-badge badge-cod">💵 COD</span>
+                                <span class="payment-badge badge-cod">COD</span>
                             @else
-                                <span class="payment-badge badge-paid">💳 LUNAS</span>
+                                <span class="payment-badge badge-paid">LUNAS</span>
                             @endif
 
-                            <span class="badge-status badge-online">🟢 Selesai</span>
+                            <span class="badge-status badge-online">Selesai</span>
                         </div>
                     </div>
 
@@ -83,7 +98,7 @@
                         <!-- ITEM TERANTAR -->
                         @if(isset($completedOrder->items) && count($completedOrder->items) > 0)
                             <div class="order-items-box">
-                                <div class="order-items-title">🛍️ Item Terantar:</div>
+                                <div class="order-items-title">Item Terantar:</div>
                                 <ul class="order-item-list">
                                     @foreach($completedOrder->items as $item)
                                         <li><strong>{{ $item->quantity }}x</strong> {{ $item->product_name }}</li>
@@ -92,18 +107,33 @@
                             </div>
                         @endif
 
-                        <p style="margin-top: 8px;"><strong>Total Tagihan:</strong> <strong class="text-price">Rp {{ number_format($completedOrder->total_price, 0, ',', '.') }}</strong></p>
+                        <p class="courier-history-total">
+                            <strong>Total Tagihan:</strong> <strong class="text-price">Rp {{ number_format($completedOrder->total_price, 0, ',', '.') }}</strong>
+                        </p>
                     </div>
 
                     <!-- FOOTER KARTU KONSISTEN -->
-                    <div class="delivery-card-footer">
-                        @if(!empty($completedOrder->customer_phone))
-                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $completedOrder->customer_phone) }}" target="_blank" class="btn-whatsapp">
-                                💬 Hubungi WhatsApp Customer
-                            </a>
-                        @else
-                            <span class="empty-row" style="font-size: 12px;">💬 No HP Customer Tidak Tersedia</span>
-                        @endif
+                    <div class="delivery-card-footer courier-history-footer">
+                        <div>
+                            @if(!empty($completedOrder->customer_phone))
+                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $completedOrder->customer_phone) }}" target="_blank" class="btn-whatsapp">
+                                    Hubungi WhatsApp Customer
+                                </a>
+                            @else
+                                <span class="empty-row courier-no-phone">No HP Customer Tidak Tersedia</span>
+                            @endif
+                        </div>
+
+                        <form action="{{ route('courier.orders.destroy', $completedOrder->id) }}"
+                              method="POST"
+                              class="flex-form"
+                              onsubmit="return confirm('Hapus riwayat pesanan selesai #ORD-{{ $completedOrder->id }}?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn-cancel-edit courier-btn-delete-history">
+                                Hapus Riwayat
+                            </button>
+                        </form>
                     </div>
                 </div>
             @empty
