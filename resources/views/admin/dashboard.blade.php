@@ -16,7 +16,7 @@
                      onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
                      alt="Logo Lumbi Uwuu"
                      class="admin-brand-logo">
-                <span class="admin-brand-text">Lumbi Uwuu Store</span>
+                <span class="admin-brand-text">Admin Lumbi Uwuu</span>
             </div>
             <ul class="sidebar-menu">
                 <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a></li>
@@ -153,6 +153,9 @@
                     </thead>
                     <tbody>
                         @forelse($recentOrders as $order)
+                            @php
+                                $reviewText = $order->review ?? ($order->ulasan ?? null);
+                            @endphp
                             <tr>
                                 <td><strong>#ORD-{{ $order->id }}</strong></td>
                                 <td>
@@ -215,9 +218,9 @@
                                         <span class="admin-unassigned-text">Belum ada rating</span>
                                     @endif
 
-                                    @if(!empty($order->review))
+                                    @if(!empty($reviewText))
                                         <div class="admin-wa-subtext">
-                                            Ulasan: "{{ $order->review }}"
+                                            Ulasan: "{{ $reviewText }}"
                                         </div>
                                     @else
                                         <div class="admin-unassigned-text">Belum ada ulasan</div>

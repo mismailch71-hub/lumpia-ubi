@@ -1056,3 +1056,80 @@ html::-webkit-scrollbar-thumb:hover,
     cursor: pointer;
     border: none;
 }
+
+.order-summary-action-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.order-summary-action-row .order-total-row {
+    margin: 0;
+}
+
+.delete-order-form {
+    margin: 0;
+}
+
+.btn-delete-order {
+    background-color: #dc2626;
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.btn-delete-order:hover {
+    background-color: #b91c1c;
+}
+
+.rating-review-form {
+    margin-top: 14px;
+}
+
+.rating-box-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.rating-select {
+    width: auto;
+    min-width: 140px;
+}
+
+.review-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.review-checkbox-input {
+    margin: 0;
+    cursor: pointer;
+}
+
+.review-box-wrapper {
+    display: none;
+    margin-top: 10px;
+}
+
+.review-box-wrapper.is-visible {
+    display: block;
+}
+
+.review-textarea {
+    resize: vertical;
+}

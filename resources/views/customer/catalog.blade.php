@@ -16,20 +16,16 @@
     @endphp
 
     <div class="mobile-top-header">
-        <img src="{{ asset('images/logo-lumbi.jpeg') }}"
-                     onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
-                     alt="Logo Lumbi Uwuu"
-                     class="admin-brand-logo">
-                <span class="admin-brand-text">Lumbi Uwuu Store</span>
+        <span>Lumbi Uwuu Store</span>
     </div>
 
     <aside class="sidebar">
         <div>
             <div class="sidebar-brand">
                 <img src="{{ asset('images/logo-lumbi.jpeg') }}"
-                     onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
-                     alt="Logo Lumbi Uwuu"
-                     class="admin-brand-logo">
+                    onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
+                    alt="Logo Lumbi Uwuu"
+                    class="admin-brand-logo">
                 <span class="admin-brand-text">Lumbi Uwuu Store</span>
             </div>
             <ul class="sidebar-menu">
@@ -191,7 +187,7 @@
                 <input type="hidden" name="earned_points" id="earnedPointsInput" value="0">
 
                 <div class="form-group">
-                    <label>Nomor HP WhatsApp (Untuk Verifikasi Sudah Bayar) <span class="text-danger-star">*</span></label>
+                    <label>Nomor HP WhatsApp yang Aktif <span class="text-danger-star">*</span></label>
                     <input type="tel" name="whatsapp_phone" id="customerWaPhone" class="form-control"
                            value="{{ $currentUser->phone ?? $currentUser->no_hp ?? $currentUser->whatsapp ?? '' }}"
                            placeholder="Contoh: 081234567890" required>

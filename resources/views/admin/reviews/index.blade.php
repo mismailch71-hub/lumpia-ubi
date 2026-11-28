@@ -58,6 +58,9 @@
                     </thead>
                     <tbody>
                         @forelse($orders as $order)
+                            @php
+                                $reviewText = $order->review ?? ($order->ulasan ?? null);
+                            @endphp
                             <tr>
                                 <td><strong>#ORD-{{ $order->id }}</strong></td>
                                 <td>{{ $order->customer_name ?? ($order->user->name ?? 'Customer') }}</td>
@@ -70,8 +73,8 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if(!empty($order->review))
-                                        "{{ $order->review }}"
+                                    @if(!empty($reviewText))
+                                        "{{ $reviewText }}"
                                     @else
                                         <span class="admin-unassigned-text">Belum ada ulasan</span>
                                     @endif

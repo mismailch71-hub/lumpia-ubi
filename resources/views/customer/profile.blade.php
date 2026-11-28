@@ -35,7 +35,7 @@
 
     <!-- HEADER ATAS KHUSUS TAMPILAN HP -->
     <div class="mobile-top-header">
-        <span>Lumpia Ubi Store</span>
+        <span>Lumbi Uwuu Store</span>
     </div>
 
     <!-- SIDEBAR CUSTOMER -->

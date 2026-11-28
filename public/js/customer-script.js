@@ -616,3 +616,23 @@ document.addEventListener('DOMContentLoaded', function () {
         window.toggleCustomerEditForm();
     }
 });
+
+function toggleReviewBox(orderId) {
+    const checkbox = document.getElementById('reviewCheckbox-' + orderId);
+    const box = document.getElementById('reviewBox-' + orderId);
+    const textarea = document.getElementById('reviewTextarea-' + orderId);
+
+    if (!checkbox || !box) return;
+
+    if (checkbox.checked) {
+        box.classList.add('is-visible');
+        if (textarea) {
+            textarea.focus();
+        }
+    } else {
+        box.classList.remove('is-visible');
+        if (textarea) {
+            textarea.value = '';
+        }
+    }
+}

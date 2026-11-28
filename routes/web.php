@@ -13,6 +13,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use App\Http\Controllers\OrderChatController;
 
 // 1. Landing Page Publik
@@ -85,7 +86,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('products', ProductController::class);
 
     // Menu Promo
-    // Menu Promo
     Route::get('/promos', function () {
         $promo = DB::table('promos')->orderByDesc('id')->first();
 
@@ -125,9 +125,46 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Menu Ulasan & Rating
     Route::get('/reviews', function () {
-        $orders = DB::table('orders')
-            ->orderByDesc('id')
-            ->get();
+        $query = DB::table('orders')
+            ->leftJoin('users as customers', 'orders.user_id', '=', 'customers.id')
+            ->leftJoin('users as couriers', 'orders.courier_id', '=', 'couriers.id')
+            ->select(
+                'orders.*',
+                'customers.name as customer_name',
+                'couriers.name as courier_name'
+            );
+
+        $hasRatingCol = \Illuminate\Support\Facades\Schema::hasColumn('orders', 'rating');
+        $hasReviewCol = \Illuminate\Support\Facades\Schema::hasColumn('orders', 'review');
+        $hasUlasanCol = \Illuminate\Support\Facades\Schema::hasColumn('orders', 'ulasan');
+
+        if ($hasRatingCol || $hasReviewCol || $hasUlasanCol) {
+            $query->where(function ($q) use ($hasRatingCol, $hasReviewCol, $hasUlasanCol) {
+                $added = false;
+
+                if ($hasRatingCol) {
+                    $q->whereNotNull('orders.rating');
+                    $added = true;
+                }
+                if ($hasReviewCol) {
+                    $method = $added ? 'orWhere' : 'where';
+                    $q->{$method}(function ($sub) {
+                        $sub->whereNotNull('orders.review')
+                            ->where('orders.review', '!=', '');
+                    });
+                    $added = true;
+                }
+                if ($hasUlasanCol) {
+                    $method = $added ? 'orWhere' : 'where';
+                    $q->{$method}(function ($sub) {
+                        $sub->whereNotNull('orders.ulasan')
+                            ->where('orders.ulasan', '!=', '');
+                    });
+                }
+            });
+        }
+
+        $orders = $query->orderByDesc('orders.id')->get();
 
         return view('admin.reviews.index', compact('orders'));
     })->name('reviews.index');
@@ -173,8 +210,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
             return redirect()->route('admin.customers.index')->with('error', 'Data customer tidak ditemukan.');
         }
 
-        $hasPhoneCol = \Illuminate\Support\Facades\Schema::hasColumn('users', 'phone');
-        $hasNoHpCol = \Illuminate\Support\Facades\Schema::hasColumn('users', 'no_hp');
+        $hasPhoneCol = Schema::hasColumn('users', 'phone');
+        $hasNoHpCol = Schema::hasColumn('users', 'no_hp');
 
         $rules = [
             'name'     => ['required', 'string', 'max:150'],
@@ -214,8 +251,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
     // Menu Pengeluaran (Bahan Baku & Biaya Produksi)
-    Route::get('/expenses', function (\Illuminate\Http\Request $request) {
-        $query = \Illuminate\Support\Facades\DB::table('expenses');
+    Route::get('/expenses', function (Request $request) {
+        $query = DB::table('expenses');
 
         if ($request->filled('category') && in_array($request->category, ['bahan_baku', 'biaya_produksi'])) {
             $query->where('category', $request->category);
@@ -244,8 +281,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
         $filteredTotal = (clone $query)->sum('amount');
 
-        $totalBahanBaku = \Illuminate\Support\Facades\DB::table('expenses')->where('category', 'bahan_baku')->sum('amount');
-        $totalBiayaProduksi = \Illuminate\Support\Facades\DB::table('expenses')->where('category', 'biaya_produksi')->sum('amount');
+        $totalBahanBaku = DB::table('expenses')->where('category', 'bahan_baku')->sum('amount');
+        $totalBiayaProduksi = DB::table('expenses')->where('category', 'biaya_produksi')->sum('amount');
         $totalExpenses = $totalBahanBaku + $totalBiayaProduksi;
 
         return view('admin.expenses.index', compact(
@@ -257,7 +294,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ));
     })->name('expenses.index');
 
-    Route::post('/expenses', function (\Illuminate\Http\Request $request) {
+    Route::post('/expenses', function (Request $request) {
         $data = $request->validate([
             'category'     => 'required|in:bahan_baku,biaya_produksi',
             'item_name'    => 'required|string|max:150',
@@ -266,7 +303,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
             'notes'        => 'nullable|string|max:500',
         ]);
 
-        \Illuminate\Support\Facades\DB::table('expenses')->insert([
+        DB::table('expenses')->insert([
             'category'     => $data['category'],
             'item_name'    => $data['item_name'],
             'amount'       => $data['amount'],
@@ -280,7 +317,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     })->name('expenses.store');
 
     Route::delete('/expenses/{id}', function ($id) {
-        \Illuminate\Support\Facades\DB::table('expenses')->where('id', $id)->delete();
+        DB::table('expenses')->where('id', $id)->delete();
 
         return redirect()->route('admin.expenses.index')->with('success', 'Data pengeluaran dihapus.');
     })->name('expenses.destroy');
@@ -301,6 +338,79 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
     Route::get('/catalog', [CustomerOrderController::class, 'catalog'])->name('catalog');
     Route::post('/orders/store', [CustomerOrderController::class, 'storeOrder'])->name('orders.store');
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
+
+    // [DITAMBAHKAN] Simpan Rating & Ulasan Pesanan Customer
+    Route::post('/orders/{id}/rating', function (Request $request, $id) {
+        $validated = $request->validate([
+            'rating'      => ['required', 'integer', 'min:1', 'max:5'],
+            'with_review' => ['nullable', 'boolean'],
+            'review'      => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $userId = auth()->id();
+        $orderQuery = DB::table('orders')->where('id', $id);
+
+        if (Schema::hasColumn('orders', 'user_id')) {
+            $orderQuery->where('user_id', $userId);
+        } elseif (Schema::hasColumn('orders', 'customer_id')) {
+            $orderQuery->where('customer_id', $userId);
+        }
+
+        $order = $orderQuery->first();
+
+        if (! $order) {
+            return back()->with('error', 'Pesanan tidak ditemukan.');
+        }
+
+        $updateData = [
+            'rating'     => (int) $validated['rating'],
+            'updated_at' => now(),
+        ];
+
+        $hasReview = $request->boolean('with_review') && ! empty(trim((string) ($validated['review'] ?? '')));
+        $reviewText = $hasReview ? trim((string) $validated['review']) : null;
+
+        if (Schema::hasColumn('orders', 'review')) {
+            $updateData['review'] = $reviewText;
+        }
+        if (Schema::hasColumn('orders', 'ulasan')) {
+            $updateData['ulasan'] = $reviewText;
+        }
+
+        DB::table('orders')->where('id', $id)->update($updateData);
+
+        return back()->with('success', 'Rating dan ulasan pesanan #ORD-' . $id . ' berhasil disimpan.');
+    })->name('orders.rating');
+
+    // [DITAMBAHKAN] Hapus Riwayat Pesanan Lama milik Customer
+    Route::delete('/orders/{id}', function ($id) {
+        $userId = auth()->id();
+        $orderQuery = DB::table('orders')->where('id', $id);
+
+        if (Schema::hasColumn('orders', 'user_id')) {
+            $orderQuery->where('user_id', $userId);
+        } elseif (Schema::hasColumn('orders', 'customer_id')) {
+            $orderQuery->where('customer_id', $userId);
+        }
+
+        $order = $orderQuery->first();
+
+        if (! $order) {
+            return back()->with('error', 'Pesanan tidak ditemukan.');
+        }
+
+        if (! in_array(strtolower((string) ($order->status ?? '')), ['selesai', 'dibatalkan', 'batal', 'ditolak'])) {
+            return back()->with('error', 'Hanya pesanan yang sudah selesai atau dibatalkan yang dapat dihapus.');
+        }
+
+        if (Schema::hasTable('order_items')) {
+            DB::table('order_items')->where('order_id', $id)->delete();
+        }
+
+        DB::table('orders')->where('id', $id)->delete();
+
+        return back()->with('success', 'Riwayat pesanan #ORD-' . $id . ' berhasil dihapus.');
+    })->name('orders.destroy');
 
     Route::get('/profile', function () {
         return view('customer.profile', ['user' => auth()->user()]);
