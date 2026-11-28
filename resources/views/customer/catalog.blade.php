@@ -16,7 +16,11 @@
     @endphp
 
     <div class="mobile-top-header">
-        <span>Lumpia Ubi Store</span>
+        <img src="{{ asset('images/logo-lumbi.jpeg') }}"
+                     onerror="if (this.src.endsWith('.jpeg')) { this.src='{{ asset('images/logo-lumbi.jpg') }}'; } else if (this.src.endsWith('.jpg')) { this.src='{{ asset('images/logo-lumbi.png') }}'; }"
+                     alt="Logo Lumbi Uwuu"
+                     class="admin-brand-logo">
+                <span class="admin-brand-text">Lumbi Uwuu Store</span>
     </div>
 
     <aside class="sidebar">
